@@ -1,0 +1,33 @@
+{
+  "name": "@kiyasov/platform-hono",
+  "version": "1.0.0",
+  "description": "Nest adapter for Hono",
+  "author": "Islam Kiiasov",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.11.2",
+    "hono": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.3.2",
+    "@nestjs/common": "^10.3.8",
+    "@nestjs/core": "^10.3.8",
+    "@swc/cli": "^0.3.12",
+    "@swc/core": "^1.5.24",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tsc": "^2.0.4",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build:esm": "tsc --p tsconfig.esm.json",
+    "build:cjs": "tsc --p tsconfig.cjs.json",
+    "build": "npm run build:esm && npm run build:cjs",
+    "dev": "cd example && yarn nest start -w --copy-files"
+  }
+}

@@ -1,0 +1,8 @@
+# source
+src
+example
+
+# configs
+tsconfig.json
+tsconfig.cjs.json
+tsconfig.esm.json
