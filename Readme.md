@@ -19,13 +19,6 @@ const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
   new HonoAdapter()
 );
-
-// You can also pass your own instance of Hono app to the adapter
-const hono = new Hono();
-const app = await NestFactory.create<NestHonoApplication>(
-  AppModule,
-  new HonoAdapter(hono)
-);
 ```
 
 ### Exception filters
