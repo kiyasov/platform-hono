@@ -16,6 +16,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
+    console.error(exception);
+
     const httpStatus =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -25,6 +27,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      errorMessages: exception instanceof Error ? exception.message : exception,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

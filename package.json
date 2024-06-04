@@ -1,24 +1,36 @@
 {
   "name": "@kiyasov/platform-hono",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "Nest adapter for Hono",
   "author": "Islam Kiiasov",
   "license": "MIT",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js"
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@hono/graphql-server": "^0.4.3",
     "@hono/node-server": "^1.11.2",
     "hono": "^4.4.3"
   },
   "devDependencies": {
+    "@apollo/server": "^4.10.4",
+    "@nestjs/apollo": "^12.1.0",
     "@nestjs/cli": "^10.3.2",
     "@nestjs/common": "^10.3.8",
     "@nestjs/core": "^10.3.8",
+    "@nestjs/graphql": "^12.1.1",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.5.24",
+    "@types/busboy": "^1.5.4",
+    "graphql-subscriptions": "^2.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "tsc": "^2.0.4",

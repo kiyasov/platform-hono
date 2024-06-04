@@ -1,8 +1,9 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HonoAdapter, NestHonoApplication } from '../../dist';
 
+import { NestHonoApplication } from '../../src/interfaces';
 import { AllExceptionsFilter } from './filters/all-exception.filter';
+import { HonoAdapter } from '../../dist/cjs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestHonoApplication>(

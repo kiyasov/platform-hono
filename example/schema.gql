@@ -1,0 +1,17 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Author {
+  firstName: String
+  id: Int!
+  lastName: String
+}
+
+type Query {
+  getAuthor: Author!
+}
+
+type Subscription {
+  authorAdded: Author
+}
