@@ -8,6 +8,10 @@ type Author {
   lastName: String
 }
 
+type Mutation {
+  uploadFile(image: Upload!, name: String!): Boolean!
+}
+
 type Query {
   getAuthor: Author!
 }
@@ -15,3 +19,6 @@ type Query {
 type Subscription {
   authorAdded: Author
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
