@@ -92,7 +92,7 @@ export class AppController {
     @Body() body: Record<string, unknown>,
     @UploadedFile() file: File,
   ): string {
-    this.logger.debug({ body, file });
+    // this.logger.debug({ body, file });
     return 'uploadFile';
   }
 

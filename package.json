@@ -29,9 +29,14 @@
     "@nestjs/graphql": "^12.1.1",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.5.24",
+    "@types/autocannon": "^7",
+    "@types/bun": "^1.1.3",
     "@types/busboy": "^1.5.4",
+    "autocannon": "^7.15.0",
+    "bun": "^1.1.12",
     "graphql-subscriptions": "^2.0.0",
     "reflect-metadata": "^0.2.2",
+    "rimraf": "^5.0.7",
     "rxjs": "^7.8.1",
     "tsc": "^2.0.4",
     "typescript": "^5.4.5"
@@ -40,6 +45,11 @@
     "build:esm": "tsc --p tsconfig.esm.json",
     "build:cjs": "tsc --p tsconfig.cjs.json",
     "build": "npm run build:esm && npm run build:cjs",
-    "dev": "cd example && yarn nest start -w --copy-files"
+    "dev": "cd example && yarn nest start -w --copy-files",
+    "dev:bun": "cd example && nest start -w --copy-files --exec \"bun run\"",
+    "benchmark": "yarn dev & ( sleep 5 && autocannon -c 200 -d 5 -p 10 http://localhost:3000 )",
+    "benchmark:bun": "yarn dev:bun & ( sleep 5 && autocannon -c 200 -d 5 -p 10 http://localhost:3000 )",
+    "benchmark:bun:file": "yarn run dev:bun & ( sleep 5 && bun run ./benchmarks/benchmark.mjs)",
+    "benchmark:node:file": "yarn run dev  & ( sleep 5 && node ./benchmarks/benchmark.mjs)"
   }
 }
