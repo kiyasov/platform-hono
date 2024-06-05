@@ -1,5 +1,8 @@
 # Hono NestJS Adapter
 
+[![NPM version](https://badge.fury.io/js/@kiyasov%2Fplatform-hono.svg)](https://www.npmjs.com/package/@kiyasov/platform-hono)
+[![NPM Downloads](https://img.shields.io/npm/dw/%40kiyasov%2Fplatform-hono)](https://www.npmjs.com/package/@kiyasov/platform-hono)
+
 This package allows you to use Hono with the NestJS framework.
 
 ## Components
@@ -8,12 +11,22 @@ This package allows you to use Hono with the NestJS framework.
 
 ## How to Use
 
+### Setup
+
+To install [`@kiyasov/platform-hono`](https://www.npmjs.com/package/@kiyasov/platform-hono):
+
+```shell
+npm install @kiyasov/platform-hono
+# or
+yarn add @kiyasov/platform-hono
+```
+
 ### Create Application
 
 ```typescript
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { HonoAdapter } from "./hono.adapter";
+import { HonoAdapter } from "@kiyasov/platform-hono";
 
 const app = await NestFactory.create<NestHonoApplication>(
   AppModule,
