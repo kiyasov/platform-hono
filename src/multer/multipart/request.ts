@@ -16,10 +16,6 @@ export type THonoRequest = HonoRequest & {
 export const getMultipartRequest = (ctx: HttpArgumentsHost) => {
   const req = ctx.getRequest<THonoRequest>();
 
-  if (!req.header("content-type")?.startsWith("multipart/form-data")) {
-    throw new BadRequestException("Not a multipart request");
-  }
-
   return req;
 };
 

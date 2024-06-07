@@ -1,18 +1,18 @@
-import { Observable, tap } from 'rxjs';
+import { Observable, tap } from "rxjs";
 import {
   CallHandler,
   ExecutionContext,
   mixin,
   NestInterceptor,
   Type,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
-import { getMultipartRequest } from '../multipart/request';
-import { transformUploadOptions, UploadOptions } from '../multipart/options';
-import { handleMultipartAnyFiles } from '../multipart/handlers/any-files';
+import { getMultipartRequest } from "../multipart/request";
+import { transformUploadOptions, UploadOptions } from "../multipart/options";
+import { handleMultipartAnyFiles } from "../multipart/handlers/any-files";
 
 export function AnyFilesInterceptor(
-  options?: UploadOptions,
+  options?: UploadOptions
 ): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
     private readonly options: UploadOptions;
@@ -23,14 +23,18 @@ export function AnyFilesInterceptor(
 
     async intercept(
       context: ExecutionContext,
-      next: CallHandler,
+      next: CallHandler
     ): Promise<Observable<any>> {
       const ctx = context.switchToHttp();
       const req = getMultipartRequest(ctx);
 
+      if (!req.header("content-type")?.startsWith("multipart/form-data")) {
+        return next.handle();
+      }
+
       const { body, files, remove } = await handleMultipartAnyFiles(
         req,
-        this.options,
+        this.options
       );
 
       req.body = body;
