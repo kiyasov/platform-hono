@@ -9,6 +9,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestHonoApplication>(
     AppModule,
     new HonoAdapter(),
+    {
+      rawBody: true,
+    },
   );
 
   app.useStaticAssets('/f', {
@@ -17,7 +20,7 @@ async function bootstrap() {
 
   app.useBodyParser('application/json', 5 * 1024 * 1024);
   app.useBodyParser('application/x-www-form-urlencoded', 5 * 1024 * 1024);
-  app.useBodyParser('multipart/form-data', 50 * 1024 * 1024);
+  app.useBodyParser('text/plain', 10 * 1024 * 1024);
 
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));

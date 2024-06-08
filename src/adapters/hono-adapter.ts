@@ -210,10 +210,20 @@ export class HonoAdapter extends AbstractHttpAdapter<
     this.instance.use(cors(options));
   }
 
-  public useBodyParser(type: TypeBodyParser, bodyLimit: number = 1e6) {
-    Logger.log("Registering body parser middleware");
+  public useBodyParser(
+    type: TypeBodyParser,
+    rawBody?: boolean,
+    bodyLimit?: number
+  ) {
+    Logger.log(
+      `Registering body parser middleware for type: ${type} | bodyLimit: ${bodyLimit}`
+    );
     this.instance.use(this.bodyLimit(bodyLimit), async (ctx, next) => {
       const contentType = ctx.req.header("content-type");
+
+      if (rawBody) {
+        (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+      }
 
       switch (type) {
         case "application/json":
@@ -222,7 +232,6 @@ export class HonoAdapter extends AbstractHttpAdapter<
           break;
         case "text/plain":
           if (contentType?.startsWith("text/plain")) {
-            (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
             (ctx.req as any).body = await ctx.req.json();
           }
           break;
@@ -258,15 +267,15 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return "hono";
   }
 
-  public registerParserMiddleware(prefix?: string, rawBody?: boolean) {
+  public registerParserMiddleware(_prefix?: string, rawBody?: boolean) {
     if (this._isParserRegistered) {
       return;
     }
 
     Logger.log("Registering parser middleware");
-    this.useBodyParser("application/x-www-form-urlencoded");
-    this.useBodyParser("application/json");
-    this.useBodyParser("text/plain");
+    this.useBodyParser("application/x-www-form-urlencoded", rawBody);
+    this.useBodyParser("application/json", rawBody);
+    this.useBodyParser("text/plain", rawBody);
 
     this._isParserRegistered = true;
   }
