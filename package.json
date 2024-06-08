@@ -1,6 +1,6 @@
 {
   "name": "@kiyasov/platform-hono",
-  "version": "1.1.9",
+  "version": "1.2.0",
   "description": "Nest adapter for Hono",
   "author": "Islam Kiiasov",
   "license": "MIT",

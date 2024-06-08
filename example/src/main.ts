@@ -15,6 +15,10 @@ async function bootstrap() {
     root: 'public',
   });
 
+  app.useBodyParser('application/json', 5 * 1024 * 1024);
+  app.useBodyParser('application/x-www-form-urlencoded', 5 * 1024 * 1024);
+  app.useBodyParser('multipart/form-data', 50 * 1024 * 1024);
+
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 

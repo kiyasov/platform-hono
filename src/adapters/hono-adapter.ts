@@ -36,9 +36,14 @@ export class HonoAdapter extends AbstractHttpAdapter<
   Context
 > {
   protected readonly instance: Hono<{ Bindings: HttpBindings }>;
+  private _isParserRegistered: boolean;
 
   constructor() {
     super(new Hono());
+  }
+
+  get isParserRegistered(): boolean {
+    return !!this._isParserRegistered;
   }
 
   private getRouteAndHandler(
@@ -227,6 +232,10 @@ export class HonoAdapter extends AbstractHttpAdapter<
       }
       await next();
     });
+
+    // To avoid the Nest application init to override our custom
+    // body parser, we mark the parsers as registered.
+    this._isParserRegistered = true;
   }
 
   public close(): Promise<void> {
@@ -250,10 +259,16 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public registerParserMiddleware(prefix?: string, rawBody?: boolean) {
+    if (this._isParserRegistered) {
+      return;
+    }
+
     Logger.log("Registering parser middleware");
     this.useBodyParser("application/x-www-form-urlencoded");
     this.useBodyParser("application/json");
     this.useBodyParser("text/plain");
+
+    this._isParserRegistered = true;
   }
 
   public async createMiddlewareFactory(requestMethod: RequestMethod) {
