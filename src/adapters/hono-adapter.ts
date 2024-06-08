@@ -221,17 +221,20 @@ export class HonoAdapter extends AbstractHttpAdapter<
     this.instance.use(this.bodyLimit(bodyLimit), async (ctx, next) => {
       const contentType = ctx.req.header("content-type");
 
-      if (rawBody) {
-        (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-      }
-
       switch (type) {
         case "application/json":
-          if (contentType?.startsWith("application/json"))
+          if (contentType?.startsWith("application/json")) {
+            if (rawBody) {
+              (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+            }
             (ctx.req as any).body = await ctx.req.json();
+          }
           break;
         case "text/plain":
           if (contentType?.startsWith("text/plain")) {
+            if (rawBody) {
+              (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+            }
             (ctx.req as any).body = await ctx.req.json();
           }
           break;
