@@ -3,6 +3,10 @@
   "version": "1.2.0",
   "description": "Nest adapter for Hono",
   "author": "Islam Kiiasov",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kiyasov/platform-hono"
+  },
   "license": "MIT",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
