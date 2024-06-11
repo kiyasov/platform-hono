@@ -14,14 +14,13 @@ import {
   serveStatic,
 } from "@hono/node-server/serve-static";
 import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter";
-import { Context, HonoRequest, Next } from "hono";
-import { Hono } from "hono";
+import { Context, Next, Hono } from "hono";
 import { cors } from "hono/cors";
 import { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
 import * as http from "http";
 import { Http2SecureServer, Http2Server } from "http2";
 import * as https from "https";
-import { TypeBodyParser } from "../interfaces";
+import { HonoRequest, TypeBodyParser } from "../interfaces";
 
 type HonoHandler = RequestHandler<HonoRequest, Context>;
 
@@ -221,28 +220,35 @@ export class HonoAdapter extends AbstractHttpAdapter<
     this.instance.use(this.bodyLimit(bodyLimit), async (ctx, next) => {
       const contentType = ctx.req.header("content-type");
 
-      switch (type) {
-        case "application/json":
-          if (contentType?.startsWith("application/json")) {
-            if (rawBody) {
-              (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-            }
-            (ctx.req as any).body = await ctx.req.json();
-          }
-          break;
-        case "text/plain":
-          if (contentType?.startsWith("text/plain")) {
-            if (rawBody) {
-              (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-            }
-            (ctx.req as any).body = await ctx.req.json();
-          }
-          break;
-        default:
-          (ctx.req as any).body = await ctx.req.parseBody({ all: true });
-          break;
+      if (
+        contentType?.startsWith("application/json") ||
+        contentType?.startsWith("text/plain")
+      ) {
+        if (rawBody) {
+          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+        }
+        (ctx.req as any).body = await ctx.req.json();
+
+        return await next();
       }
-      await next();
+
+      if (contentType !== type) {
+        return await next();
+      }
+
+      if (contentType?.startsWith("application/json")) {
+        if (rawBody) {
+          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+        }
+        (ctx.req as any).body = await ctx.req.json();
+      } else if (contentType?.startsWith("text/plain")) {
+        if (rawBody) {
+          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+        }
+        (ctx.req as any).body = await ctx.req.json();
+      }
+
+      return await next();
     });
 
     // To avoid the Nest application init to override our custom
@@ -255,6 +261,10 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public initHttpServer(options: NestApplicationOptions) {
+    this.instance.use((ctx, next) => {
+      ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
+      return next();
+    });
     const isHttpsEnabled = options?.httpsOptions;
     const createServer = isHttpsEnabled
       ? https.createServer

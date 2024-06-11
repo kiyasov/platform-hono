@@ -9,15 +9,16 @@ import {
   RawBodyRequest,
   Req,
   UseInterceptors,
+  Headers,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { HonoRequest } from 'hono';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
   FilesInterceptor,
   UploadedFile,
   UploadedFiles,
+  HonoRequest,
 } from '../../dist/cjs';
 
 @Controller()
@@ -41,8 +42,9 @@ export class AppController {
   async post(
     @Body() body: Record<string, unknown>,
     @Req() req: RawBodyRequest<HonoRequest>,
+    @Headers('user-agent') userAgent: string,
   ) {
-    this.logger.debug({ body });
+    this.logger.debug({ body, userAgent });
     return 'Post';
   }
 
