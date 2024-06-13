@@ -34,6 +34,32 @@ export class AuthorsResolver {
     return true;
   }
 
+  @Mutation(() => Boolean)
+  async uploadFiles(
+    @Args('images', { type: () => [GraphQLUpload] }) images: FileUpload[],
+  ) {
+    for (const image of images) {
+      const { createReadStream, filename } = image;
+      const readStream = createReadStream();
+
+      const chunks: any[] = [];
+
+      for await (const chunk of readStream) {
+        chunks.push(chunk);
+      }
+      const fileBuffer = Buffer.concat(chunks);
+      const outDir = join(process.cwd(), 'uploads');
+      const outPath = join(outDir, filename);
+
+      await fs.promises.mkdir(outDir, { recursive: true });
+      await fs.promises.writeFile(outPath, fileBuffer);
+
+      console.log(`File uploaded to: ${outPath}`);
+    }
+
+    return true;
+  }
+
   @Query(() => Author)
   async getAuthor(): Promise<Author> {
     return {

@@ -10,6 +10,7 @@ type Author {
 
 type Mutation {
   uploadFile(image: Upload!, name: String!): Boolean!
+  uploadFiles(images: [Upload!]!): Boolean!
 }
 
 type Query {

@@ -18,9 +18,9 @@ async function bootstrap() {
     root: 'public',
   });
 
-  app.useBodyParser('application/json', 5 * 1024 * 1024);
-  app.useBodyParser('application/x-www-form-urlencoded', 5 * 1024 * 1024);
-  app.useBodyParser('text/plain', 10 * 1024 * 1024);
+  app.useBodyParser('application/json', 50 * 1024 * 1024);
+  app.useBodyParser('application/x-www-form-urlencoded', 50 * 1024 * 1024);
+  app.useBodyParser('text/plain', 50 * 1024 * 1024);
 
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
