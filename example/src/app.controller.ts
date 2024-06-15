@@ -12,6 +12,8 @@ import {
   Headers,
   Param,
   Query,
+  Ip,
+  HostParam,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import {
@@ -43,6 +45,11 @@ export class AppController {
   @Get('/user/:userId')
   getUser(@Param('userId') userId: string): string {
     return `User ${userId}`;
+  }
+
+  @Get('/ip')
+  getIP(@Ip() ip: string): string {
+    return `IP ${ip}`;
   }
 
   @Get('/query')

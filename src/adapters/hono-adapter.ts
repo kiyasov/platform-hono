@@ -263,6 +263,17 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   public initHttpServer(options: NestApplicationOptions) {
     this.instance.use((ctx, next) => {
+      ctx.req["ip"] =
+        ctx.req.header("cf-connecting-ip") ??
+        ctx.req.header("x-forwarded-for") ??
+        ctx.req.header("x-real-ip") ??
+        ctx.req.header("forwarded") ??
+        ctx.req.header("true-client-ip") ??
+        ctx.req.header("x-client-ip") ??
+        ctx.req.header("x-cluster-client-ip") ??
+        ctx.req.header("x-forwarded") ??
+        ctx.req.header("forwarded-for") ??
+        ctx.req.header("via");
       ctx.req["query"] = ctx.req.query() as any;
       ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
 
