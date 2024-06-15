@@ -56,6 +56,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   private createRouteHandler(routeHandler: HonoHandler) {
     return async (ctx: Context, next: Next) => {
+      ctx.req["params"] = ctx.req.param();
       await routeHandler(ctx.req, ctx, next);
       return this.send(ctx);
     };
@@ -263,6 +264,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public initHttpServer(options: NestApplicationOptions) {
     this.instance.use((ctx, next) => {
       ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
+
       return next();
     });
     const isHttpsEnabled = options?.httpsOptions;

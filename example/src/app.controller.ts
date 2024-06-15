@@ -10,6 +10,7 @@ import {
   Req,
   UseInterceptors,
   Headers,
+  Param,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import {
@@ -36,6 +37,11 @@ export class AppController {
   @Get('/noAuth')
   noAuth(): string {
     throw new Error('Not implemented');
+  }
+
+  @Get('/user/:userId')
+  getUser(@Param('userId') userId: string): string {
+    return `User ${userId}`;
   }
 
   @Post('/post')
