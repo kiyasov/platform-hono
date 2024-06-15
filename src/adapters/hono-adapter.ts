@@ -263,6 +263,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   public initHttpServer(options: NestApplicationOptions) {
     this.instance.use((ctx, next) => {
+      ctx.req["query"] = ctx.req.query() as any;
       ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
 
       return next();

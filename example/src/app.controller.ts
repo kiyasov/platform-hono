@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   Headers,
   Param,
+  Query,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import {
@@ -42,6 +43,11 @@ export class AppController {
   @Get('/user/:userId')
   getUser(@Param('userId') userId: string): string {
     return `User ${userId}`;
+  }
+
+  @Get('/query')
+  getQuery(@Query() query: Record<string, unknown>): string {
+    return `Query ${JSON.stringify(query)}`;
   }
 
   @Post('/post')
