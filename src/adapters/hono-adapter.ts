@@ -218,39 +218,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     Logger.log(
       `Registering body parser middleware for type: ${type} | bodyLimit: ${bodyLimit}`
     );
-    this.instance.use(this.bodyLimit(bodyLimit), async (ctx, next) => {
-      const contentType = ctx.req.header("content-type");
-
-      if (
-        contentType?.startsWith("application/json") ||
-        contentType?.startsWith("text/plain")
-      ) {
-        if (rawBody) {
-          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-        }
-        (ctx.req as any).body = await ctx.req.json();
-
-        return await next();
-      }
-
-      if (contentType !== type) {
-        return await next();
-      }
-
-      if (contentType?.startsWith("application/json")) {
-        if (rawBody) {
-          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-        }
-        (ctx.req as any).body = await ctx.req.json();
-      } else if (contentType?.startsWith("text/plain")) {
-        if (rawBody) {
-          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-        }
-        (ctx.req as any).body = await ctx.req.json();
-      }
-
-      return await next();
-    });
+    this.instance.use(this.bodyLimit(bodyLimit));
 
     // To avoid the Nest application init to override our custom
     // body parser, we mark the parsers as registered.
@@ -262,7 +230,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public initHttpServer(options: NestApplicationOptions) {
-    this.instance.use((ctx, next) => {
+    this.instance.use(async (ctx, next) => {
       ctx.req["ip"] =
         ctx.req.header("cf-connecting-ip") ??
         ctx.req.header("x-forwarded-for") ??
@@ -276,6 +244,23 @@ export class HonoAdapter extends AbstractHttpAdapter<
         ctx.req.header("via");
       ctx.req["query"] = ctx.req.query() as any;
       ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
+
+      const contentType = ctx.req.header("content-type");
+
+      if (
+        contentType?.startsWith("multipart/form-data") ||
+        contentType?.startsWith("application/x-www-form-urlencoded")
+      ) {
+        (ctx.req as any).body = await ctx.req.parseBody();
+      } else if (
+        contentType?.startsWith("application/json") ||
+        contentType?.startsWith("text/plain")
+      ) {
+        if (options.rawBody) {
+          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+        }
+        (ctx.req as any).body = await ctx.req.json();
+      }
 
       return next();
     });
