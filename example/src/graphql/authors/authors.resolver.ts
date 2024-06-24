@@ -12,8 +12,8 @@ export class AuthorsResolver {
   @Mutation(() => Boolean)
   async uploadFile(
     @Args('image', { type: () => GraphQLUpload }) image: FileUpload,
-    @Args('name') name: string,
   ): Promise<boolean> {
+    console.log(image);
     const { createReadStream, filename } = image;
     const readStream = createReadStream();
 
@@ -30,7 +30,7 @@ export class AuthorsResolver {
     await fs.promises.writeFile(outPath, fileBuffer);
 
     console.log(`File uploaded to: ${outPath}`);
-    console.log(`Name: ${name}`);
+
     return true;
   }
 

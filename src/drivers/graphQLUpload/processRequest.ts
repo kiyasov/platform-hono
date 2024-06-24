@@ -25,12 +25,19 @@ export async function processRequest(
     Readable.from(buffer).pipe(capacitor);
 
     const upload = new Upload();
+
     upload.file = {
       filename: file.name,
       mimetype: file.type,
       fieldName,
       encoding: "7bit",
-      createReadStream: (options) => capacitor.createReadStream(options),
+      createReadStream: (options) => {
+        const stream = capacitor.createReadStream(options);
+        stream.on("close", () => {
+          capacitor.release();
+        });
+        return stream;
+      },
       capacitor,
     };
     upload.resolve(upload.file);
