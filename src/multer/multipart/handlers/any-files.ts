@@ -1,14 +1,14 @@
-import { UploadOptions } from '../options';
-import { StorageFile } from '../../storage';
-import { THonoRequest, getParts } from '../request';
-import { removeStorageFiles } from '../file';
-import { filterUpload } from '../filter';
+import { UploadOptions } from "../options";
+import { StorageFile } from "../../storage";
+import { THonoRequest, getParts } from "../request";
+import { removeStorageFiles } from "../file";
+import { filterUpload } from "../filter";
 
 export const handleMultipartAnyFiles = async (
   req: THonoRequest,
-  options: UploadOptions,
+  options: UploadOptions
 ) => {
-  const parts = await getParts(req, options);
+  const parts = getParts(req, options);
 
   const body: Record<string, any> = {};
 

@@ -1,16 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from "@nestjs/common";
 
-import { UploadOptions } from '../options';
-import { StorageFile } from '../../storage';
-import { THonoRequest, getParts } from '../request';
-import { filterUpload } from '../filter';
+import { UploadOptions } from "../options";
+import { StorageFile } from "../../storage";
+import { THonoRequest, getParts } from "../request";
+import { filterUpload } from "../filter";
 
 export const handleMultipartSingleFile = async (
   req: THonoRequest,
   fieldname: string,
-  options: UploadOptions,
+  options: UploadOptions
 ) => {
-  const parts = await getParts(req, options);
+  const parts = getParts(req, options);
   const body: Record<string, any> = {};
 
   let file: StorageFile | undefined = undefined;
@@ -29,11 +29,11 @@ export const handleMultipartSingleFile = async (
 
       if (partFieldName !== fieldname) {
         throw new BadRequestException(
-          `Field ${partFieldName} doesn't accept file`,
+          `Field ${partFieldName} doesn't accept file`
         );
       } else if (file != null) {
         throw new BadRequestException(
-          `Field ${fieldname} accepts only one file`,
+          `Field ${fieldname} accepts only one file`
         );
       }
 

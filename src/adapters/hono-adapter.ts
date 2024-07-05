@@ -251,7 +251,9 @@ export class HonoAdapter extends AbstractHttpAdapter<
         contentType?.startsWith("multipart/form-data") ||
         contentType?.startsWith("application/x-www-form-urlencoded")
       ) {
-        (ctx.req as any).body = await ctx.req.parseBody();
+        (ctx.req as any).body = await ctx.req.parseBody({
+          all: true,
+        });
       } else if (
         contentType?.startsWith("application/json") ||
         contentType?.startsWith("text/plain")

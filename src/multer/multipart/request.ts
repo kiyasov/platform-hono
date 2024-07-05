@@ -19,10 +19,10 @@ export const getMultipartRequest = (ctx: HttpArgumentsHost) => {
   return req;
 };
 
-export const getParts = async (req: THonoRequest, options: UploadOptions) => {
-  const files = await req.parseBody({ all: true });
+export const getParts = (req: THonoRequest, options: UploadOptions) => {
+  const parts = req.body;
 
-  for (const [key, file] of Object.entries(files)) {
+  for (const [key, file] of Object.entries(parts)) {
     if (
       file instanceof File &&
       options?.limits?.fileSize &&
@@ -34,7 +34,7 @@ export const getParts = async (req: THonoRequest, options: UploadOptions) => {
     }
   }
 
-  return files;
+  return parts;
 };
 
 export type MultipartsIterator = AsyncIterableIterator<MultipartFile>;

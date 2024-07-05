@@ -1,11 +1,11 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException } from "@nestjs/common";
 
-import { UploadOptions } from '../options';
-import { StorageFile } from '../../storage/storage';
-import { THonoRequest, getParts } from '../request';
-import { removeStorageFiles } from '../file';
-import { filterUpload } from '../filter';
-import { HonoRequest } from 'hono';
+import { UploadOptions } from "../options";
+import { StorageFile } from "../../storage/storage";
+import { THonoRequest, getParts } from "../request";
+import { removeStorageFiles } from "../file";
+import { filterUpload } from "../filter";
+import { HonoRequest } from "hono";
 
 export interface UploadField {
   /**
@@ -18,7 +18,7 @@ export interface UploadField {
   maxCount?: number;
 }
 
-export type UploadFieldMapEntry = Required<Pick<UploadField, 'maxCount'>>;
+export type UploadFieldMapEntry = Required<Pick<UploadField, "maxCount">>;
 
 export const uploadFieldsToMap = (uploadFields: UploadField[]) => {
   const map = new Map<string, UploadFieldMapEntry>();
@@ -33,9 +33,9 @@ export const uploadFieldsToMap = (uploadFields: UploadField[]) => {
 export const handleMultipartFileFields = async (
   req: THonoRequest,
   fieldsMap: Map<string, UploadFieldMapEntry>,
-  options: UploadOptions,
+  options: UploadOptions
 ) => {
-  const parts = await getParts(req, options);
+  const parts = getParts(req, options);
   const body: Record<string, any> = {};
 
   const files: Record<string, StorageFile[]> = {};
@@ -56,7 +56,7 @@ export const handleMultipartFileFields = async (
 
       if (fieldOptions == null) {
         throw new BadRequestException(
-          `Field ${fieldName} doesn't accept files`,
+          `Field ${fieldName} doesn't accept files`
         );
       }
 
@@ -66,7 +66,7 @@ export const handleMultipartFileFields = async (
 
       if (files[fieldName].length + 1 > fieldOptions.maxCount) {
         throw new BadRequestException(
-          `Field ${fieldName} accepts max ${fieldOptions.maxCount} files`,
+          `Field ${fieldName} accepts max ${fieldOptions.maxCount} files`
         );
       }
 
