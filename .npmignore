@@ -1,8 +1,10 @@
 # source
 .ts
 example
+src
 
 # configs
 tsconfig.json
 tsconfig.cjs.json
 tsconfig.esm.json
+
