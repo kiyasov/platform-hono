@@ -14,6 +14,7 @@ import {
   Query,
   Ip,
   HostParam,
+  All,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import {
@@ -129,5 +130,10 @@ export class AppController {
   ): string {
     this.logger.debug({ body, file });
     return 'uploadFile';
+  }
+
+  @All('/all')
+  all(): string {
+    return `Al`;
   }
 }

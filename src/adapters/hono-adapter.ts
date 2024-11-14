@@ -25,6 +25,7 @@ import { HonoRequest, TypeBodyParser } from "../interfaces";
 type HonoHandler = RequestHandler<HonoRequest, Context>;
 
 type ServerType = Server | Http2Server | Http2SecureServer;
+type Ctx = Context | (() => Promise<Context>);
 
 /**
  * Adapter for using Hono with NestJS.
@@ -62,9 +63,21 @@ export class HonoAdapter extends AbstractHttpAdapter<
     };
   }
 
-  private send(ctx: Context) {
+  private async send(ctx: Ctx) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     const body = ctx.get("body");
     return typeof body === "string" ? ctx.text(body) : ctx.json(body);
+  }
+
+  public all(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
+    const [routePath, routeHandler] = this.getRouteAndHandler(
+      pathOrHandler,
+      handler
+    );
+    this.instance.all(routePath, this.createRouteHandler(routeHandler));
   }
 
   public get(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
@@ -123,10 +136,14 @@ export class HonoAdapter extends AbstractHttpAdapter<
     this.instance.options(routePath, this.createRouteHandler(routeHandler));
   }
 
-  public async reply(ctx: Context, body: any, statusCode?: StatusCode) {
+  public async reply(ctx: Ctx, body: any, statusCode?: StatusCode) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     if (statusCode) ctx.status(statusCode);
 
-    const responseContentType = this.getHeader(ctx, "Content-Type");
+    const responseContentType = await this.getHeader(ctx, "Content-Type");
     if (
       !responseContentType?.startsWith("application/json") &&
       body?.statusCode >= HttpStatus.BAD_REQUEST
@@ -139,7 +156,11 @@ export class HonoAdapter extends AbstractHttpAdapter<
     ctx.set("body", body);
   }
 
-  public status(ctx: Context, statusCode: StatusCode) {
+  public async status(ctx: Ctx, statusCode: StatusCode) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     ctx.status(statusCode);
   }
 
@@ -151,7 +172,11 @@ export class HonoAdapter extends AbstractHttpAdapter<
     throw new Error("Method not implemented.");
   }
 
-  public redirect(ctx: Context, statusCode: RedirectStatusCode, url: string) {
+  public async redirect(ctx: Ctx, statusCode: RedirectStatusCode, url: string) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     ctx.redirect(url, statusCode);
   }
 
@@ -178,23 +203,43 @@ export class HonoAdapter extends AbstractHttpAdapter<
     throw new Error("Method not implemented.");
   }
 
-  public isHeadersSent(ctx: Context): boolean {
-    return true;
+  public async isHeadersSent(ctx: Ctx): Promise<boolean> {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
+    return ctx.finalized;
   }
 
-  public getHeader?(ctx: Context, name: string) {
+  public async getHeader?(ctx: Ctx, name: string) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     return ctx.req.header(name);
   }
 
-  public setHeader(ctx: Context, name: string, value: string) {
+  public async setHeader(ctx: Ctx, name: string, value: string) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     ctx.header(name, value);
   }
 
-  public appendHeader?(ctx: Context, name: string, value: string) {
+  public async appendHeader?(ctx: Ctx, name: string, value: string) {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     ctx.res.headers.append(name, value);
   }
 
-  public getRequestHostname(ctx: Context): string {
+  public async getRequestHostname(ctx: Ctx): Promise<string> {
+    if (typeof ctx === "function") {
+      ctx = await ctx();
+    }
+
     return ctx.req.header().host;
   }
 
@@ -264,7 +309,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
         (ctx.req as any).body = await ctx.req.json();
       }
 
-      return next();
+      await next();
     });
     const isHttpsEnabled = options?.httpsOptions;
     const createServer = isHttpsEnabled
