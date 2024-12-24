@@ -69,7 +69,26 @@ export class HonoAdapter extends AbstractHttpAdapter<
     }
 
     const body = ctx.get("body");
-    return typeof body === "string" ? ctx.text(body) : ctx.json(body);
+    let responseContentType = await this.getHeader(ctx, "Content-Type");
+
+    if (responseContentType === "text/plain;charset=UTF-8") {
+      if (body instanceof Buffer) {
+        responseContentType = "application/octet-stream";
+      } else if (typeof body === "object") {
+        responseContentType = "application/json";
+      }
+
+      this.setHeader(ctx, "Content-Type", responseContentType);
+    }
+
+    if (
+      responseContentType === "application/json" &&
+      typeof body === "object"
+    ) {
+      return ctx.json(body);
+    }
+
+    return ctx.body(body);
   }
 
   public all(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
@@ -144,6 +163,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     if (statusCode) ctx.status(statusCode);
 
     const responseContentType = await this.getHeader(ctx, "Content-Type");
+
     if (
       !responseContentType?.startsWith("application/json") &&
       body?.statusCode >= HttpStatus.BAD_REQUEST
@@ -153,6 +173,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       );
       this.setHeader(ctx, "Content-Type", "application/json");
     }
+
     ctx.set("body", body);
   }
 
@@ -216,7 +237,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx = await ctx();
     }
 
-    return ctx.req.header(name);
+    return ctx.res.headers.get(name);
   }
 
   public async setHeader(ctx: Ctx, name: string, value: string) {
@@ -224,7 +245,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx = await ctx();
     }
 
-    ctx.header(name, value);
+    ctx.res.headers.set(name, value);
   }
 
   public async appendHeader?(ctx: Ctx, name: string, value: string) {

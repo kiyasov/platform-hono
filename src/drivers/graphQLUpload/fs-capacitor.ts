@@ -45,7 +45,7 @@ export class ReadStream extends Readable {
     // Using `allocUnsafe` here is OK because we return a slice the length of
     // `bytesRead`, and discard the rest. This prevents node from having to zero
     // out the entire allocation first.
-    const buf = Buffer.allocUnsafe(n);
+    const buf = new Uint8Array(Buffer.allocUnsafe(n).buffer);
     read(this._writeStream["_fd"], buf, 0, n, this._pos, (error, bytesRead) => {
       if (error) this.destroy(error);
 
@@ -199,7 +199,13 @@ export class WriteStream extends Writable {
       return;
     }
 
-    write(this._fd, chunk, 0, chunk.length, this._pos, (error) => {
+    const uint8Array = new Uint8Array(
+      chunk.buffer,
+      chunk.byteOffset,
+      chunk.byteLength
+    );
+
+    write(this._fd, uint8Array, 0, chunk.length, this._pos, (error) => {
       if (error) {
         callback(error);
         return;

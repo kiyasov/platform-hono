@@ -15,8 +15,11 @@ import {
   Ip,
   HostParam,
   All,
+  Res,
+  Header,
 } from '@nestjs/common';
 import { AppService } from './app.service';
+import { readFile } from 'fs/promises';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
@@ -25,6 +28,7 @@ import {
   UploadedFiles,
   HonoRequest,
 } from '../../dist/cjs';
+import { Context } from 'hono';
 
 @Controller()
 export class AppController {
@@ -35,6 +39,19 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @Get('/json')
+  getJson(): Record<string, unknown> {
+    return { message: 'Hello World!' };
+  }
+
+  @Get('/download')
+  @Header('Content-Type', 'application/octet-stream')
+  async download() {
+    const fileBuffer = await readFile(process.cwd() + '/uploads/ff.png');
+
+    return fileBuffer;
   }
 
   @HttpCode(HttpStatus.UNAUTHORIZED)
