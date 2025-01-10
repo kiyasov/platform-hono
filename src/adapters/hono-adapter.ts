@@ -71,7 +71,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     const body = ctx.get("body");
     let responseContentType = await this.getHeader(ctx, "Content-Type");
 
-    if (responseContentType === "text/plain;charset=UTF-8") {
+    if (!responseContentType || responseContentType.startsWith("text/plain")) {
       if (body instanceof Buffer) {
         responseContentType = "application/octet-stream";
       } else if (typeof body === "object") {
