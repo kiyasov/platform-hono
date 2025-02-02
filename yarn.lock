@@ -445,12 +445,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hono/node-server@npm:^1.13.7":
-  version: 1.13.7
-  resolution: "@hono/node-server@npm:1.13.7"
+"@hono/node-server@npm:^1.13.8":
+  version: 1.13.8
+  resolution: "@hono/node-server@npm:1.13.8"
   peerDependencies:
     hono: ^4
-  checksum: 10c0/a50da48fd0b5c647db20a4cefdbec10af957753427bb6b66388f2716a9d3910f192f2f51d0a3ddb9e5e0d6f9057451daabbd84fe8f6190e5ab15c35f86ebaafa
+  checksum: 10c0/5880892fddc2e3272886b3158a278baf3d054d5772bbe98bb71d5eb1c6030900653c7445221ad4de688527522d782ac5924fb27f944d76fad0cdf7d48ca030d0
   languageName: node
   linkType: hard
 
@@ -730,22 +730,22 @@ __metadata:
   resolution: "@kiyasov/platform-hono@workspace:."
   dependencies:
     "@apollo/server": "npm:^4.11.3"
-    "@hono/node-server": "npm:^1.13.7"
+    "@hono/node-server": "npm:^1.13.8"
     "@nestjs/apollo": "npm:^13.0.2"
     "@nestjs/cli": "npm:^11.0.2"
-    "@nestjs/common": "npm:^11.0.6"
-    "@nestjs/core": "npm:^11.0.6"
+    "@nestjs/common": "npm:^11.0.7"
+    "@nestjs/core": "npm:^11.0.7"
     "@nestjs/graphql": "npm:^13.0.2"
     "@swc/cli": "npm:^0.6.0"
-    "@swc/core": "npm:^1.10.11"
+    "@swc/core": "npm:^1.10.12"
     "@types/autocannon": "npm:^7.12.6"
-    "@types/bun": "npm:^1.2.1"
+    "@types/bun": "npm:^1.2.2"
     "@types/busboy": "npm:^1.5.4"
     autocannon: "npm:^8.0.0"
-    bun: "npm:^1.2.1"
+    bun: "npm:^1.2.2"
     graphql: "npm:^16.10.0"
     graphql-subscriptions: "npm:^3.0.0"
-    hono: "npm:^4.6.19"
+    hono: "npm:^4.6.20"
     reflect-metadata: "npm:^0.2.2"
     rimraf: "npm:^6.0.1"
     rxjs: "npm:^7.8.1"
@@ -1004,9 +1004,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^11.0.6":
-  version: 11.0.6
-  resolution: "@nestjs/common@npm:11.0.6"
+"@nestjs/common@npm:^11.0.7":
+  version: 11.0.7
+  resolution: "@nestjs/common@npm:11.0.7"
   dependencies:
     iterare: "npm:1.2.1"
     tslib: "npm:2.8.1"
@@ -1021,13 +1021,13 @@ __metadata:
       optional: true
     class-validator:
       optional: true
-  checksum: 10c0/e1c773c480634bf991a06f4db8862f10a6d6e7f45c60eee69b671ccd447fc501d5a7e2efb96739980deccaaeeb189c5f5502e8feb0456c858e9c1abb2d6fcbae
+  checksum: 10c0/d5a776fa1f8a1781e9af12fa48e151e75e575b92a377a395ecd9f6a16023acf392dfa7ec5033abc31365d8b29b1956e345c6717d2d0c5ce7967c487a3c768912
   languageName: node
   linkType: hard
 
-"@nestjs/core@npm:^11.0.6":
-  version: 11.0.6
-  resolution: "@nestjs/core@npm:11.0.6"
+"@nestjs/core@npm:^11.0.7":
+  version: 11.0.7
+  resolution: "@nestjs/core@npm:11.0.7"
   dependencies:
     "@nuxt/opencollective": "npm:0.4.1"
     fast-safe-stringify: "npm:2.1.1"
@@ -1049,7 +1049,7 @@ __metadata:
       optional: true
     "@nestjs/websockets":
       optional: true
-  checksum: 10c0/9ad10ed199b7c99c4888b6e885403c0351a06b3876b4ea7d9bc6b73da94267f73398cbabef3075cb57966013ea6a1d0ada0d5223bc6b090cbf7d78ed18171402
+  checksum: 10c0/a2fe62a9727a77bb3f0debe95c966b042e27f95001c331c2554aaa72175c8b46b9875857432270b5a1b87f610cb560091454492329f36160eb22c8c86091de46
   languageName: node
   linkType: hard
 
@@ -1184,79 +1184,79 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oven/bun-darwin-aarch64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-darwin-aarch64@npm:1.2.1"
+"@oven/bun-darwin-aarch64@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-darwin-aarch64@npm:1.2.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@oven/bun-darwin-x64-baseline@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-darwin-x64-baseline@npm:1.2.1"
+"@oven/bun-darwin-x64-baseline@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-darwin-x64-baseline@npm:1.2.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-darwin-x64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-darwin-x64@npm:1.2.1"
+"@oven/bun-darwin-x64@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-darwin-x64@npm:1.2.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-aarch64-musl@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-aarch64-musl@npm:1.2.1"
+"@oven/bun-linux-aarch64-musl@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-aarch64-musl@npm:1.2.2"
   conditions: os=linux & cpu=aarch64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-aarch64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-aarch64@npm:1.2.1"
+"@oven/bun-linux-aarch64@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-aarch64@npm:1.2.2"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-x64-baseline@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-x64-baseline@npm:1.2.1"
+"@oven/bun-linux-x64-baseline@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-x64-baseline@npm:1.2.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-x64-musl-baseline@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-x64-musl-baseline@npm:1.2.1"
+"@oven/bun-linux-x64-musl-baseline@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-x64-musl-baseline@npm:1.2.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-x64-musl@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-x64-musl@npm:1.2.1"
+"@oven/bun-linux-x64-musl@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-x64-musl@npm:1.2.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-linux-x64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-linux-x64@npm:1.2.1"
+"@oven/bun-linux-x64@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-linux-x64@npm:1.2.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-windows-x64-baseline@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-windows-x64-baseline@npm:1.2.1"
+"@oven/bun-windows-x64-baseline@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-windows-x64-baseline@npm:1.2.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@oven/bun-windows-x64@npm:1.2.1":
-  version: 1.2.1
-  resolution: "@oven/bun-windows-x64@npm:1.2.1"
+"@oven/bun-windows-x64@npm:1.2.2":
+  version: 1.2.2
+  resolution: "@oven/bun-windows-x64@npm:1.2.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1382,90 +1382,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-arm64@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-darwin-arm64@npm:1.10.11"
+"@swc/core-darwin-arm64@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-darwin-arm64@npm:1.10.12"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-darwin-x64@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-darwin-x64@npm:1.10.11"
+"@swc/core-darwin-x64@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-darwin-x64@npm:1.10.12"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm-gnueabihf@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.10.11"
+"@swc/core-linux-arm-gnueabihf@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-linux-arm-gnueabihf@npm:1.10.12"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-gnu@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-linux-arm64-gnu@npm:1.10.11"
+"@swc/core-linux-arm64-gnu@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-linux-arm64-gnu@npm:1.10.12"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-arm64-musl@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-linux-arm64-musl@npm:1.10.11"
+"@swc/core-linux-arm64-musl@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-linux-arm64-musl@npm:1.10.12"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-gnu@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-linux-x64-gnu@npm:1.10.11"
+"@swc/core-linux-x64-gnu@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-linux-x64-gnu@npm:1.10.12"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@swc/core-linux-x64-musl@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-linux-x64-musl@npm:1.10.11"
+"@swc/core-linux-x64-musl@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-linux-x64-musl@npm:1.10.12"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@swc/core-win32-arm64-msvc@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-win32-arm64-msvc@npm:1.10.11"
+"@swc/core-win32-arm64-msvc@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-win32-arm64-msvc@npm:1.10.12"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@swc/core-win32-ia32-msvc@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-win32-ia32-msvc@npm:1.10.11"
+"@swc/core-win32-ia32-msvc@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-win32-ia32-msvc@npm:1.10.12"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@swc/core-win32-x64-msvc@npm:1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core-win32-x64-msvc@npm:1.10.11"
+"@swc/core-win32-x64-msvc@npm:1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core-win32-x64-msvc@npm:1.10.12"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@swc/core@npm:^1.10.11":
-  version: 1.10.11
-  resolution: "@swc/core@npm:1.10.11"
+"@swc/core@npm:^1.10.12":
+  version: 1.10.12
+  resolution: "@swc/core@npm:1.10.12"
   dependencies:
-    "@swc/core-darwin-arm64": "npm:1.10.11"
-    "@swc/core-darwin-x64": "npm:1.10.11"
-    "@swc/core-linux-arm-gnueabihf": "npm:1.10.11"
-    "@swc/core-linux-arm64-gnu": "npm:1.10.11"
-    "@swc/core-linux-arm64-musl": "npm:1.10.11"
-    "@swc/core-linux-x64-gnu": "npm:1.10.11"
-    "@swc/core-linux-x64-musl": "npm:1.10.11"
-    "@swc/core-win32-arm64-msvc": "npm:1.10.11"
-    "@swc/core-win32-ia32-msvc": "npm:1.10.11"
-    "@swc/core-win32-x64-msvc": "npm:1.10.11"
+    "@swc/core-darwin-arm64": "npm:1.10.12"
+    "@swc/core-darwin-x64": "npm:1.10.12"
+    "@swc/core-linux-arm-gnueabihf": "npm:1.10.12"
+    "@swc/core-linux-arm64-gnu": "npm:1.10.12"
+    "@swc/core-linux-arm64-musl": "npm:1.10.12"
+    "@swc/core-linux-x64-gnu": "npm:1.10.12"
+    "@swc/core-linux-x64-musl": "npm:1.10.12"
+    "@swc/core-win32-arm64-msvc": "npm:1.10.12"
+    "@swc/core-win32-ia32-msvc": "npm:1.10.12"
+    "@swc/core-win32-x64-msvc": "npm:1.10.12"
     "@swc/counter": "npm:^0.1.3"
     "@swc/types": "npm:^0.1.17"
   peerDependencies:
@@ -1494,7 +1494,7 @@ __metadata:
   peerDependenciesMeta:
     "@swc/helpers":
       optional: true
-  checksum: 10c0/5452f85d1a42c4a686cfaa141fb46cf18a1b14d5e5684d44e55e7ae63dd365a18810b94cf338bcbc2ef948e392cc35d7458c58c5b2e36e8fb37ed7ff136af00e
+  checksum: 10c0/ce46f64bd66d21dd1fea3afa7f82dcc28520ccac13f2b6c580d37b58b97a3b97281300bed24a20294d3dd4eeb2e50fb5a3e5d15a278aa80a9474e362c83fa5ff
   languageName: node
   linkType: hard
 
@@ -1549,12 +1549,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bun@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@types/bun@npm:1.2.1"
+"@types/bun@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@types/bun@npm:1.2.2"
   dependencies:
-    bun-types: "npm:1.2.1"
-  checksum: 10c0/35da85b50f68c2b4839e6e664c3c4330ba920e19069f4cf9b86fe8e51e42b8e89f87a5e49ff9017cbef1201ac1e9dfac75dbff33f73eba37188edc80bed3ada7
+    bun-types: "npm:1.2.2"
+  checksum: 10c0/fc1281a3322c797d7165ac9157bf45d039c18232563432f8a389740793a6a7e6ec8b9f593859b77045adce76531fb80e2ea10aa28de686bb44a707badfb26fb2
   languageName: node
   linkType: hard
 
@@ -2418,31 +2418,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bun-types@npm:1.2.1":
-  version: 1.2.1
-  resolution: "bun-types@npm:1.2.1"
+"bun-types@npm:1.2.2":
+  version: 1.2.2
+  resolution: "bun-types@npm:1.2.2"
   dependencies:
     "@types/node": "npm:*"
     "@types/ws": "npm:~8.5.10"
-  checksum: 10c0/2aa7c1cadffd7b5583165cf96bf107e70b7ff99562edda5c5d0b6879e48c3ff6139276cd42ef23779f10619539977e4436d6f715ff0529218e05248531e6f27f
+  checksum: 10c0/388e9bd7bf04ee01e33785eca8953f6a839fe0609e5542af50c33d57f41f1bc82d5009508f2b9350f63ca57efd7f95949e7ea406b6f2d262cf6e3818070a23d8
   languageName: node
   linkType: hard
 
-"bun@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "bun@npm:1.2.1"
+"bun@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "bun@npm:1.2.2"
   dependencies:
-    "@oven/bun-darwin-aarch64": "npm:1.2.1"
-    "@oven/bun-darwin-x64": "npm:1.2.1"
-    "@oven/bun-darwin-x64-baseline": "npm:1.2.1"
-    "@oven/bun-linux-aarch64": "npm:1.2.1"
-    "@oven/bun-linux-aarch64-musl": "npm:1.2.1"
-    "@oven/bun-linux-x64": "npm:1.2.1"
-    "@oven/bun-linux-x64-baseline": "npm:1.2.1"
-    "@oven/bun-linux-x64-musl": "npm:1.2.1"
-    "@oven/bun-linux-x64-musl-baseline": "npm:1.2.1"
-    "@oven/bun-windows-x64": "npm:1.2.1"
-    "@oven/bun-windows-x64-baseline": "npm:1.2.1"
+    "@oven/bun-darwin-aarch64": "npm:1.2.2"
+    "@oven/bun-darwin-x64": "npm:1.2.2"
+    "@oven/bun-darwin-x64-baseline": "npm:1.2.2"
+    "@oven/bun-linux-aarch64": "npm:1.2.2"
+    "@oven/bun-linux-aarch64-musl": "npm:1.2.2"
+    "@oven/bun-linux-x64": "npm:1.2.2"
+    "@oven/bun-linux-x64-baseline": "npm:1.2.2"
+    "@oven/bun-linux-x64-musl": "npm:1.2.2"
+    "@oven/bun-linux-x64-musl-baseline": "npm:1.2.2"
+    "@oven/bun-windows-x64": "npm:1.2.2"
+    "@oven/bun-windows-x64-baseline": "npm:1.2.2"
   dependenciesMeta:
     "@oven/bun-darwin-aarch64":
       optional: true
@@ -2469,7 +2469,7 @@ __metadata:
   bin:
     bun: bin/bun.exe
     bunx: bin/bun.exe
-  checksum: 10c0/74511849b3dbd16804ad025aad7a5e879aa7136aa0eef0adc7814bb7c811aa3b45420f4df4a3bf4084977bbadbfa01c31a3b40f9ae49133a86385df8e58a079c
+  checksum: 10c0/e24f39912a448d95a7c8c6f70896685b0db3f18b10e24d06b28b8419958bf1e787c25c09e87899a044f99bd9badaf8ffa1792b84bc4d0890a3d8db51689de519
   conditions: (os=darwin | os=linux | os=win32) & (cpu=arm64 | cpu=x64 | cpu=aarch64)
   languageName: node
   linkType: hard
@@ -3783,10 +3783,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hono@npm:^4.6.19":
-  version: 4.6.19
-  resolution: "hono@npm:4.6.19"
-  checksum: 10c0/7b4aaa9df87308d47b36af946ea100141fe3c5bfa26ab3a0ca38e572f6e40860e1622f17281f55867fb51678fc655b0dff3c5c7d6567bfda6b387ce4d3c8cec0
+"hono@npm:^4.6.20":
+  version: 4.6.20
+  resolution: "hono@npm:4.6.20"
+  checksum: 10c0/f4ebc987452e8cfc87577cae3b3fe7553affb10121d5fb48401d139c6c378824b9d5d88e42972781124251c466bfb8bfdeb67cb95928f9d6b91d8f4925ce031c
   languageName: node
   linkType: hard
 
