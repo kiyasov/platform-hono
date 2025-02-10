@@ -73,6 +73,6 @@ export class AuthorsResolver {
     nullable: true,
   })
   authorAdded() {
-    return this.pubSub.asyncIterator('authorAdded');
+    return this.pubSub.asyncIterableIterator('authorAdded');
   }
 }
