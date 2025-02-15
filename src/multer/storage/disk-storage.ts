@@ -1,13 +1,13 @@
-import { tmpdir } from 'os';
-import { createWriteStream } from 'fs';
-import { mkdir, unlink } from 'fs/promises';
-import { join } from 'path';
+import { tmpdir } from "os";
+import { createWriteStream } from "fs";
+import { mkdir, unlink } from "fs/promises";
+import { join } from "path";
 
-import { StorageFile, Storage } from './storage';
-import { getUniqueFilename, pathExists } from '../fs';
-import { pump } from '../stream';
-import { HonoRequest } from 'hono';
-import { Readable } from 'node:stream';
+import { StorageFile, Storage } from "./storage";
+import { getUniqueFilename, pathExists } from "../fs";
+import { pipeline } from "node:stream/promises";
+import { HonoRequest } from "hono";
+import { Readable } from "node:stream";
 
 export interface DiskStorageFile extends StorageFile {
   dest: string;
@@ -28,9 +28,9 @@ export interface DiskStorageOptions {
 const excecuteStorageHandler = (
   file: File,
   req: HonoRequest,
-  obj?: DiskStorageOptionHandler,
+  obj?: DiskStorageOptionHandler
 ) => {
-  if (typeof obj === 'function') {
+  if (typeof obj === "function") {
     return obj(file, req);
   }
 
@@ -67,7 +67,7 @@ export class DiskStorage
     const buffer = await file.arrayBuffer();
     const readableStream = Readable.from(Buffer.from(buffer));
 
-    await pump(readableStream, stream);
+    await pipeline(readableStream, stream);
 
     return {
       size: stream.bytesWritten,
@@ -76,7 +76,7 @@ export class DiskStorage
       originalFilename: file.name,
       path,
       mimetype: file.type,
-      encoding: 'utf-8',
+      encoding: "utf-8",
       fieldname: fieldName,
     };
   }
@@ -90,7 +90,7 @@ export class DiskStorage
   protected async getFilename(
     file: File,
     req: HonoRequest,
-    obj?: DiskStorageOptionHandler,
+    obj?: DiskStorageOptionHandler
   ): Promise<string> {
     return (
       excecuteStorageHandler(file, req, obj) ?? getUniqueFilename(file.name)
@@ -100,7 +100,7 @@ export class DiskStorage
   protected async getFileDestination(
     file: File,
     req: HonoRequest,
-    obj?: DiskStorageOptionHandler,
+    obj?: DiskStorageOptionHandler
   ): Promise<string> {
     return excecuteStorageHandler(file, req, obj) ?? tmpdir();
   }

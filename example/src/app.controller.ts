@@ -27,6 +27,7 @@ import {
   UploadedFile,
   UploadedFiles,
   HonoRequest,
+  MemoryStorageFile,
 } from '../../dist/cjs';
 import { Context } from 'hono';
 
@@ -103,7 +104,7 @@ export class AppController {
   )
   uploadFileFields(
     @Body() body: Record<string, unknown>,
-    @UploadedFiles() files: File[],
+    @UploadedFiles() files: MemoryStorageFile[],
   ): string {
     this.logger.debug({ body, files });
     return 'uploadFileFields';
@@ -113,7 +114,7 @@ export class AppController {
   @UseInterceptors(FilesInterceptor('files'))
   uploadFiles(
     @Body() body: Record<string, unknown>,
-    @UploadedFiles() files: File[],
+    @UploadedFiles() files: MemoryStorageFile[],
   ): string {
     this.logger.debug({ body, files });
     return 'uploadFiles';
@@ -129,7 +130,7 @@ export class AppController {
   )
   uploadFile(
     @Body() body: Record<string, unknown>,
-    @UploadedFile() file: File,
+    @UploadedFile() file: MemoryStorageFile,
   ): string {
     this.logger.debug({ body, file });
     return 'uploadFile';
@@ -143,7 +144,7 @@ export class AppController {
   )
   uploadFileStorage(
     @Body() body: Record<string, unknown>,
-    @UploadedFile() file: File,
+    @UploadedFile() file: MemoryStorageFile,
   ): string {
     this.logger.debug({ body, file });
     return 'uploadFile';
