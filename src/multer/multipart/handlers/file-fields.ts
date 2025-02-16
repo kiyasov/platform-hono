@@ -1,48 +1,57 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
+import { BodyData } from 'hono/utils/body';
 
-import { UploadOptions } from "../options";
-import { StorageFile } from "../../storage/storage";
-import { THonoRequest, getParts } from "../request";
-import { removeStorageFiles } from "../file";
-import { filterUpload } from "../filter";
-import { HonoRequest } from "hono";
+import { StorageFile } from '../../storage/storage';
+import { removeStorageFiles } from '../file';
+import { filterUpload } from '../filter';
+import { UploadOptions } from '../options';
+import { THonoRequest, getParts } from '../request';
 
 export interface UploadField {
-  /**
-   * Field name
-   */
   name: string;
-  /**
-   * Max number of files in this field
-   */
   maxCount?: number;
 }
 
-export type UploadFieldMapEntry = Required<Pick<UploadField, "maxCount">>;
+export type UploadFieldMapEntry = Required<Pick<UploadField, 'maxCount'>>;
 
-export const uploadFieldsToMap = (uploadFields: UploadField[]) => {
-  const map = new Map<string, UploadFieldMapEntry>();
+/**
+ * Converts an array of upload fields into a map for easy lookup.
+ * @param {UploadField[]} uploadFields - Array of upload field definitions.
+ * @returns {Map<string, UploadFieldMapEntry>} A map of field names to their max count settings.
+ */
+export const uploadFieldsToMap = (uploadFields: UploadField[]) =>
+  new Map(
+    uploadFields.map(({ name, ...opts }) => [name, { maxCount: 1, ...opts }]),
+  );
 
-  uploadFields.forEach(({ name, ...opts }) => {
-    map.set(name, { maxCount: 1, ...opts });
-  });
-
-  return map;
-};
-
+/**
+ * Handles multipart file fields by processing form-data parts.
+ * @param {THonoRequest} req - The incoming request object.
+ * @param {Map<string, UploadFieldMapEntry>} fieldsMap - A map of allowed upload fields.
+ * @param {UploadOptions} options - Upload options including storage handler.
+ * @returns {Promise<{ body: BodyData, files: Record<string, StorageFile[]>, remove: () => Promise<void> }>} The parsed body and files with a removal function.
+ */
 export const handleMultipartFileFields = async (
   req: THonoRequest,
   fieldsMap: Map<string, UploadFieldMapEntry>,
-  options: UploadOptions
-) => {
+  options: UploadOptions,
+): Promise<{
+  body: BodyData;
+  files: Record<string, StorageFile[]>;
+  remove: () => Promise<void>;
+}> => {
   const parts = getParts(req, options);
-  const body: Record<string, any> = {};
-
+  const body: BodyData = {};
   const files: Record<string, StorageFile[]> = {};
 
-  const removeFiles = async (error?: boolean) => {
-    const allFiles = ([] as StorageFile[]).concat(...Object.values(files));
-    return await removeStorageFiles(options.storage!, allFiles, error);
+  /**
+   * Removes stored files in case of an error or cleanup.
+   * @param {boolean} [error=false] - Whether the removal is due to an error.
+   * @returns {Promise<void>} Resolves after files are removed.
+   */
+  const removeFiles = async (error?: boolean): Promise<void> => {
+    const allFiles = Object.values(files).flat();
+    return removeStorageFiles(options.storage!, allFiles, error);
   };
 
   try {
@@ -53,25 +62,20 @@ export const handleMultipartFileFields = async (
       }
 
       const fieldOptions = fieldsMap.get(fieldName);
-
-      if (fieldOptions == null) {
+      if (!fieldOptions) {
         throw new BadRequestException(
-          `Field ${fieldName} doesn't accept files`
+          `Field ${fieldName} doesn't accept files`,
         );
       }
 
-      if (files[fieldName] == null) {
-        files[fieldName] = [];
-      }
-
-      if (files[fieldName].length + 1 > fieldOptions.maxCount) {
+      files[fieldName] = files[fieldName] || [];
+      if (files[fieldName].length >= fieldOptions.maxCount) {
         throw new BadRequestException(
-          `Field ${fieldName} accepts max ${fieldOptions.maxCount} files`
+          `Field ${fieldName} accepts max ${fieldOptions.maxCount} files`,
         );
       }
 
       const file = await options.storage!.handleFile(part, req, fieldName);
-
       if (await filterUpload(options, req, file)) {
         files[fieldName].push(file);
       }
@@ -81,9 +85,5 @@ export const handleMultipartFileFields = async (
     throw error;
   }
 
-  return {
-    body,
-    files,
-    remove: () => removeFiles(),
-  };
+  return { body, files, remove: removeFiles };
 };

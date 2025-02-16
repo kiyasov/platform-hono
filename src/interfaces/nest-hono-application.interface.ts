@@ -1,11 +1,11 @@
-import { ServeStaticOptions } from "@hono/node-server/serve-static";
-import { HttpServer, INestApplication } from "@nestjs/common";
-import { Context, Hono, MiddlewareHandler } from "hono";
+import { ServeStaticOptions } from '@hono/node-server/serve-static';
+import { HttpServer, INestApplication } from '@nestjs/common';
+import { Context, Hono, MiddlewareHandler } from 'hono';
 
 export type TypeBodyParser =
-  | "application/json"
-  | "text/plain"
-  | "application/x-www-form-urlencoded";
+  | 'application/json'
+  | 'text/plain'
+  | 'application/x-www-form-urlencoded';
 
 interface HonoViewOptions {
   engine: string;
@@ -56,17 +56,17 @@ export interface NestHonoApplication<TServer extends Hono = Hono>
    */
   listen(
     port: number | string,
-    callback?: (err: Error, address: string) => void
+    callback?: (err: Error, address: string) => void,
   ): Promise<TServer>;
   listen(
     port: number | string,
     address: string,
-    callback?: (err: Error, address: string) => void
+    callback?: (err: Error, address: string) => void,
   ): Promise<TServer>;
   listen(
     port: number | string,
     address: string,
     backlog: number,
-    callback?: (err: Error, address: string) => void
+    callback?: (err: Error, address: string) => void,
   ): Promise<TServer>;
 }

@@ -1,19 +1,20 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
+import { BodyData } from 'hono/utils/body';
 
-import { UploadOptions } from "../options";
-import { StorageFile } from "../../storage";
-import { removeStorageFiles } from "../file";
-import { THonoRequest, getParts } from "../request";
-import { filterUpload } from "../filter";
+import { StorageFile } from '../../storage';
+import { removeStorageFiles } from '../file';
+import { filterUpload } from '../filter';
+import { UploadOptions } from '../options';
+import { THonoRequest, getParts } from '../request';
 
 export const handleMultipartMultipleFiles = async (
   req: THonoRequest,
   fieldname: string,
   maxCount: number,
-  options: UploadOptions
+  options: UploadOptions,
 ) => {
   const parts = getParts(req, options);
-  const body: Record<string, any> = {};
+  const body: BodyData = {};
 
   const files: StorageFile[] = [];
 
@@ -30,13 +31,13 @@ export const handleMultipartMultipleFiles = async (
 
       if (partFieldName !== fieldname) {
         throw new BadRequestException(
-          `Field ${partFieldName} doesn't accept files`
+          `Field ${partFieldName} doesn't accept files`,
         );
       }
 
       if (files.length + 1 > maxCount) {
         throw new BadRequestException(
-          `Field ${partFieldName} accepts max ${maxCount} files`
+          `Field ${partFieldName} accepts max ${maxCount} files`,
         );
       }
 

@@ -1,26 +1,27 @@
-import { Server } from "node:net";
-import { HttpBindings, createAdaptorServer } from "@hono/node-server";
-import { RESPONSE_ALREADY_SENT } from "@hono/node-server/utils/response";
-import { RequestMethod } from "@nestjs/common";
-import { HttpStatus, Logger } from "@nestjs/common";
-import { bodyLimit } from "hono/body-limit";
+import { HttpBindings, createAdaptorServer } from '@hono/node-server';
+import {
+  ServeStaticOptions,
+  serveStatic,
+} from '@hono/node-server/serve-static';
+import { RESPONSE_ALREADY_SENT } from '@hono/node-server/utils/response';
+import { RequestMethod } from '@nestjs/common';
+import { HttpStatus, Logger } from '@nestjs/common';
 import {
   ErrorHandler,
   NestApplicationOptions,
   RequestHandler,
-} from "@nestjs/common/interfaces";
-import {
-  ServeStaticOptions,
-  serveStatic,
-} from "@hono/node-server/serve-static";
-import { AbstractHttpAdapter } from "@nestjs/core/adapters/http-adapter";
-import { Context, Next, Hono } from "hono";
-import { cors } from "hono/cors";
-import { RedirectStatusCode, StatusCode } from "hono/utils/http-status";
-import * as http from "http";
-import { Http2SecureServer, Http2Server } from "http2";
-import * as https from "https";
-import { HonoRequest, TypeBodyParser } from "../interfaces";
+} from '@nestjs/common/interfaces';
+import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter';
+import { Context, Next, Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
+import { cors } from 'hono/cors';
+import { RedirectStatusCode, StatusCode } from 'hono/utils/http-status';
+import * as http from 'http';
+import { Http2SecureServer, Http2Server } from 'http2';
+import * as https from 'https';
+import { Server } from 'node:net';
+
+import { HonoRequest, TypeBodyParser } from '../interfaces';
 
 type HonoHandler = RequestHandler<HonoRequest, Context>;
 
@@ -35,11 +36,14 @@ export class HonoAdapter extends AbstractHttpAdapter<
   HonoRequest,
   Context
 > {
-  protected readonly instance: Hono<{ Bindings: HttpBindings }>;
   private _isParserRegistered: boolean;
 
+  protected readonly instance: Hono<{ Bindings: HttpBindings }>;
+
   constructor() {
-    super(new Hono());
+    const honoInstance = new Hono<{ Bindings: HttpBindings }>();
+    super(honoInstance);
+    this.instance = honoInstance;
   }
 
   get isParserRegistered(): boolean {
@@ -48,42 +52,42 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   private getRouteAndHandler(
     pathOrHandler: string | HonoHandler,
-    handler?: HonoHandler
+    handler?: HonoHandler,
   ): [string, HonoHandler] {
-    let path = typeof pathOrHandler === "function" ? "" : pathOrHandler;
-    handler = typeof pathOrHandler === "function" ? pathOrHandler : handler;
+    const path = typeof pathOrHandler === 'function' ? '' : pathOrHandler;
+    handler = typeof pathOrHandler === 'function' ? pathOrHandler : handler;
     return [path, handler];
   }
 
   private createRouteHandler(routeHandler: HonoHandler) {
     return async (ctx: Context, next: Next) => {
-      ctx.req["params"] = ctx.req.param();
+      ctx.req['params'] = ctx.req.param();
       await routeHandler(ctx.req, ctx, next);
       return this.send(ctx);
     };
   }
 
   private async send(ctx: Ctx) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
-    const body = ctx.get("body");
-    let responseContentType = await this.getHeader(ctx, "Content-Type");
+    const body = ctx.get('body');
+    let responseContentType = await this.getHeader(ctx, 'Content-Type');
 
-    if (!responseContentType || responseContentType.startsWith("text/plain")) {
+    if (!responseContentType || responseContentType.startsWith('text/plain')) {
       if (body instanceof Buffer) {
-        responseContentType = "application/octet-stream";
-      } else if (typeof body === "object") {
-        responseContentType = "application/json";
+        responseContentType = 'application/octet-stream';
+      } else if (typeof body === 'object') {
+        responseContentType = 'application/json';
       }
 
-      this.setHeader(ctx, "Content-Type", responseContentType);
+      this.setHeader(ctx, 'Content-Type', responseContentType);
     }
 
     if (
-      responseContentType === "application/json" &&
-      typeof body === "object"
+      responseContentType === 'application/json' &&
+      typeof body === 'object'
     ) {
       return ctx.json(body);
     }
@@ -94,7 +98,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public all(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.all(routePath, this.createRouteHandler(routeHandler));
   }
@@ -102,7 +106,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public get(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.get(routePath, this.createRouteHandler(routeHandler));
   }
@@ -110,7 +114,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public post(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.post(routePath, this.createRouteHandler(routeHandler));
   }
@@ -118,7 +122,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public put(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.put(routePath, this.createRouteHandler(routeHandler));
   }
@@ -126,7 +130,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public delete(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.delete(routePath, this.createRouteHandler(routeHandler));
   }
@@ -134,7 +138,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public use(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.use(routePath, this.createRouteHandler(routeHandler));
   }
@@ -142,7 +146,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public patch(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.patch(routePath, this.createRouteHandler(routeHandler));
   }
@@ -150,35 +154,36 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public options(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
-      handler
+      handler,
     );
     this.instance.options(routePath, this.createRouteHandler(routeHandler));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async reply(ctx: Ctx, body: any, statusCode?: StatusCode) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
     if (statusCode) ctx.status(statusCode);
 
-    const responseContentType = await this.getHeader(ctx, "Content-Type");
+    const responseContentType = await this.getHeader(ctx, 'Content-Type');
 
     if (
-      !responseContentType?.startsWith("application/json") &&
+      !responseContentType?.startsWith('application/json') &&
       body?.statusCode >= HttpStatus.BAD_REQUEST
     ) {
       Logger.warn(
-        "Content-Type doesn't match Reply body, you might need a custom ExceptionFilter for non-JSON responses"
+        "Content-Type doesn't match Reply body, you might need a custom ExceptionFilter for non-JSON responses",
       );
-      this.setHeader(ctx, "Content-Type", "application/json");
+      this.setHeader(ctx, 'Content-Type', 'application/json');
     }
 
-    ctx.set("body", body);
+    ctx.set('body', body);
   }
 
   public async status(ctx: Ctx, statusCode: StatusCode) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -189,12 +194,12 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return RESPONSE_ALREADY_SENT;
   }
 
-  public render(response: any, view: string, options: any) {
-    throw new Error("Method not implemented.");
+  public render() {
+    throw new Error('Method not implemented.');
   }
 
   public async redirect(ctx: Ctx, statusCode: RedirectStatusCode, url: string) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -216,16 +221,16 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public useStaticAssets(path: string, options: ServeStaticOptions) {
-    Logger.log("Registering static assets middleware");
+    Logger.log('Registering static assets middleware');
     this.instance.use(path, serveStatic(options));
   }
 
-  public setViewEngine(options: any | string) {
-    throw new Error("Method not implemented.");
+  public setViewEngine() {
+    throw new Error('Method not implemented.');
   }
 
   public async isHeadersSent(ctx: Ctx): Promise<boolean> {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -233,7 +238,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async getHeader?(ctx: Ctx, name: string) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -241,7 +246,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async setHeader(ctx: Ctx, name: string, value: string) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -249,7 +254,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async appendHeader?(ctx: Ctx, name: string, value: string) {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -257,7 +262,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async getRequestHostname(ctx: Ctx): Promise<string> {
-    if (typeof ctx === "function") {
+    if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
@@ -272,17 +277,27 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return request.url;
   }
 
-  public enableCors(options: any) {
+  public enableCors(options: {
+    origin:
+      | string
+      | string[]
+      | ((origin: string, c: Context) => string | undefined | null);
+    allowMethods?: string[];
+    allowHeaders?: string[];
+    maxAge?: number;
+    credentials?: boolean;
+    exposeHeaders?: string[];
+  }) {
     this.instance.use(cors(options));
   }
 
   public useBodyParser(
     type: TypeBodyParser,
     rawBody?: boolean,
-    bodyLimit?: number
+    bodyLimit?: number,
   ) {
     Logger.log(
-      `Registering body parser middleware for type: ${type} | bodyLimit: ${bodyLimit}`
+      `Registering body parser middleware for type: ${type} | bodyLimit: ${bodyLimit}`,
     );
     this.instance.use(this.bodyLimit(bodyLimit));
 
@@ -297,36 +312,40 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   public initHttpServer(options: NestApplicationOptions) {
     this.instance.use(async (ctx, next) => {
-      ctx.req["ip"] =
-        ctx.req.header("cf-connecting-ip") ??
-        ctx.req.header("x-forwarded-for") ??
-        ctx.req.header("x-real-ip") ??
-        ctx.req.header("forwarded") ??
-        ctx.req.header("true-client-ip") ??
-        ctx.req.header("x-client-ip") ??
-        ctx.req.header("x-cluster-client-ip") ??
-        ctx.req.header("x-forwarded") ??
-        ctx.req.header("forwarded-for") ??
-        ctx.req.header("via");
-      ctx.req["query"] = ctx.req.query() as any;
-      ctx.req["headers"] = Object.fromEntries(ctx.req.raw.headers);
+      ctx.req['ip'] =
+        ctx.req.header('cf-connecting-ip') ??
+        ctx.req.header('x-forwarded-for') ??
+        ctx.req.header('x-real-ip') ??
+        ctx.req.header('forwarded') ??
+        ctx.req.header('true-client-ip') ??
+        ctx.req.header('x-client-ip') ??
+        ctx.req.header('x-cluster-client-ip') ??
+        ctx.req.header('x-forwarded') ??
+        ctx.req.header('forwarded-for') ??
+        ctx.req.header('via');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ctx.req['query'] = ctx.req.query() as any;
+      ctx.req['headers'] = Object.fromEntries(ctx.req.raw.headers);
 
-      const contentType = ctx.req.header("content-type");
+      const contentType = ctx.req.header('content-type');
 
       if (
-        contentType?.startsWith("multipart/form-data") ||
-        contentType?.startsWith("application/x-www-form-urlencoded")
+        contentType?.startsWith('multipart/form-data') ||
+        contentType?.startsWith('application/x-www-form-urlencoded')
       ) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (ctx.req as any).body = await ctx.req.parseBody({
           all: true,
         });
       } else if (
-        contentType?.startsWith("application/json") ||
-        contentType?.startsWith("text/plain")
+        contentType?.startsWith('application/json') ||
+        contentType?.startsWith('text/plain')
       ) {
         if (options.rawBody) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (ctx.req as any).body = await ctx.req.json();
       }
 
@@ -344,7 +363,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public getType(): string {
-    return "hono";
+    return 'hono';
   }
 
   public registerParserMiddleware(_prefix?: string, rawBody?: boolean) {
@@ -352,15 +371,16 @@ export class HonoAdapter extends AbstractHttpAdapter<
       return;
     }
 
-    Logger.log("Registering parser middleware");
-    this.useBodyParser("application/x-www-form-urlencoded", rawBody);
-    this.useBodyParser("application/json", rawBody);
-    this.useBodyParser("text/plain", rawBody);
+    Logger.log('Registering parser middleware');
+    this.useBodyParser('application/x-www-form-urlencoded', rawBody);
+    this.useBodyParser('application/json', rawBody);
+    this.useBodyParser('text/plain', rawBody);
 
     this._isParserRegistered = true;
   }
 
   public async createMiddlewareFactory(requestMethod: RequestMethod) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     return (path: string, callback: Function) => {
       const routeMethodsMap = {
         [RequestMethod.ALL]: this.instance.all,
@@ -374,16 +394,18 @@ export class HonoAdapter extends AbstractHttpAdapter<
       const routeMethod = (
         routeMethodsMap[requestMethod] || this.instance.get
       ).bind(this.instance);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       routeMethod(path, async (ctx: Context, next: Function) => {
         await callback(ctx.req, ctx, next);
       });
     };
   }
 
-  public applyVersionFilter(): () => () => any {
-    throw new Error("Versioning not yet supported in Hono");
+  public applyVersionFilter(): () => () => unknown {
+    throw new Error('Versioning not yet supported in Hono');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public listen(port: string | number, ...args: any[]): ServerType {
     return this.httpServer.listen(port, ...args);
   }
@@ -392,7 +414,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return bodyLimit({
       maxSize,
       onError: () => {
-        throw new Error("Body too large");
+        throw new Error('Body too large');
       },
     });
   }

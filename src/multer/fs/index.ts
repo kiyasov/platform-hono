@@ -1,22 +1,18 @@
-import fs from 'node:fs/promises';
-import { extname } from 'node:path';
-
-import { randomBytes } from '../crypto';
+import { randomBytes } from 'crypto';
+import { stat } from 'fs/promises';
+import { extname } from 'path';
 
 export const pathExists = async (path: string) => {
   try {
-    await fs.stat(path);
-  } catch (err) {
+    await stat(path);
+    return true;
+  } catch {
     return false;
   }
-
-  return true;
 };
 
 export const getUniqueFilename = async (filename: string) => {
-  const buffer = await randomBytes(16);
-
+  const buffer = randomBytes(16);
   const ext = extname(filename);
-
   return buffer.toString('hex') + ext;
 };

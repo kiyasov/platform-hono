@@ -1,6 +1,7 @@
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { ModulesContainer } from '@nestjs/core/injector/modules-container';
 import { BaseExplorerService, GqlModuleOptions } from '@nestjs/graphql';
+
 import { PLUGIN_METADATA } from '../constants';
 
 export class PluginsExplorerService extends BaseExplorerService {
@@ -16,7 +17,7 @@ export class PluginsExplorerService extends BaseExplorerService {
     return this.flatMap(modules, (instance) => this.filterPlugins(instance));
   }
 
-  filterPlugins<T = any>(wrapper: InstanceWrapper<T>) {
+  filterPlugins<T = unknown>(wrapper: InstanceWrapper<T>) {
     const { instance } = wrapper;
     if (!instance) {
       return undefined;

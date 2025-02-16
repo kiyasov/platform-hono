@@ -1,8 +1,9 @@
 import { Readable } from 'stream';
+
 import { Storage, StorageFile } from '../storage';
 
 export type MultipartFile = Omit<File[], 'file'> & {
-  value?: any;
+  value?: unknown;
   file: Readable & { truncated?: boolean };
 };
 

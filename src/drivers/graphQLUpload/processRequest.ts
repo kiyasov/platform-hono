@@ -1,18 +1,19 @@
-import { Context } from "hono";
-import { WriteStream, Upload } from ".";
-import { Readable } from "stream";
+import { Context } from 'hono';
+import { Readable } from 'stream';
+
+import { WriteStream, Upload } from '.';
 
 export async function processRequest(
-  ctx: Context
-): Promise<Record<string, any>> {
+  ctx: Context,
+): Promise<Record<string, unknown>> {
   const body = await ctx.req.parseBody();
   const operations = JSON.parse(body.operations as string);
   const map = new Map(Object.entries(JSON.parse(body.map as string)));
 
   for (const [fieldName, file] of Object.entries(body)) {
     if (
-      fieldName === "operations" ||
-      fieldName === "map" ||
+      fieldName === 'operations' ||
+      fieldName === 'map' ||
       !(file instanceof File)
     )
       continue;
@@ -30,10 +31,10 @@ export async function processRequest(
       filename: file.name,
       mimetype: file.type,
       fieldName,
-      encoding: "7bit",
+      encoding: '7bit',
       createReadStream: (options) => {
         const stream = capacitor.createReadStream(options);
-        stream.on("close", () => {
+        stream.on('close', () => {
           capacitor.release();
         });
         return stream;
@@ -43,7 +44,7 @@ export async function processRequest(
     upload.resolve(upload.file);
 
     for (const fileKey of fileKeys) {
-      const pathSegments = fileKey.split(".");
+      const pathSegments = fileKey.split('.');
       let current = operations;
       for (let i = 0; i < pathSegments.length - 1; i++) {
         if (!current[pathSegments[i]]) current[pathSegments[i]] = {};

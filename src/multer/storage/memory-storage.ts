@@ -1,5 +1,6 @@
-import { StorageFile, Storage } from "./storage";
-import { HonoRequest } from "hono";
+import { HonoRequest } from 'hono';
+
+import { StorageFile, Storage } from './storage';
 
 export interface MemoryStorageFile extends StorageFile {
   buffer: Buffer;
@@ -17,7 +18,7 @@ export class MemoryStorage implements Storage<MemoryStorageFile> {
     return {
       buffer,
       size: buffer.length,
-      encoding: "utf-8",
+      encoding: 'utf-8',
       mimetype: file.type,
       fieldname: fieldName,
       originalFilename: file.name,

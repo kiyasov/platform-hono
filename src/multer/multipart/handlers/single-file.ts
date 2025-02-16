@@ -1,22 +1,33 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
+import { BodyData } from 'hono/utils/body';
 
-import { UploadOptions } from "../options";
-import { StorageFile } from "../../storage";
-import { THonoRequest, getParts } from "../request";
-import { filterUpload } from "../filter";
+import { StorageFile } from '../../storage';
+import { filterUpload } from '../filter';
+import { UploadOptions } from '../options';
+import { THonoRequest, getParts } from '../request';
 
+/**
+ * Handles a single file upload in a multipart request.
+ * @param req - The request object.
+ * @param fieldname - The name of the field that should contain the file.
+ * @param options - Upload options with storage configurations.
+ * @returns An object containing the request body, uploaded file, and a remove function.
+ */
 export const handleMultipartSingleFile = async (
   req: THonoRequest,
   fieldname: string,
-  options: UploadOptions
+  options: UploadOptions,
 ) => {
   const parts = getParts(req, options);
-  const body: Record<string, any> = {};
+  const body: BodyData = {};
+  let file: StorageFile | undefined;
 
-  let file: StorageFile | undefined = undefined;
-
+  /**
+   * Removes uploaded file in case of an error or cleanup.
+   * @param error - Whether the removal is due to an error.
+   */
   const removeFiles = async (error?: boolean) => {
-    if (file == null) return;
+    if (!file) return;
     await options.storage!.removeFile(file, error);
   };
 
@@ -29,11 +40,13 @@ export const handleMultipartSingleFile = async (
 
       if (partFieldName !== fieldname) {
         throw new BadRequestException(
-          `Field ${partFieldName} doesn't accept file`
+          `Field "${partFieldName}" doesn't accept file.`,
         );
-      } else if (file != null) {
+      }
+
+      if (file) {
         throw new BadRequestException(
-          `Field ${fieldname} accepts only one file`
+          `Field "${fieldname}" accepts only one file.`,
         );
       }
 

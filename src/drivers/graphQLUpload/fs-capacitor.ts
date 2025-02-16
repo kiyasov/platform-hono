@@ -1,16 +1,16 @@
-import { randomBytes } from "crypto";
-import { read, open, closeSync, unlinkSync, write, close, unlink } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
-import { Readable, ReadableOptions, Writable, WritableOptions } from "stream";
-import { EventEmitter } from "events";
+import { randomBytes } from 'crypto';
+import { EventEmitter } from 'events';
+import { read, open, closeSync, unlinkSync, write, close, unlink } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { Readable, ReadableOptions, Writable, WritableOptions } from 'stream';
 
 export class ReadAfterDestroyedError extends Error {}
 export class ReadAfterReleasedError extends Error {}
 
 export interface ReadStreamOptions {
-  highWaterMark?: ReadableOptions["highWaterMark"];
-  encoding?: ReadableOptions["encoding"];
+  highWaterMark?: ReadableOptions['highWaterMark'];
+  encoding?: ReadableOptions['encoding'];
 }
 
 // Use a “proxy” event emitter configured to have an infinite maximum number of
@@ -19,7 +19,7 @@ export interface ReadStreamOptions {
 // https://github.com/mike-marcacci/fs-capacitor/issues/30
 const processExitProxy = new EventEmitter();
 processExitProxy.setMaxListeners(Infinity);
-process.once("exit", () => processExitProxy.emit("exit"));
+process.once('exit', () => processExitProxy.emit('exit'));
 
 export class ReadStream extends Readable {
   private _pos: number = 0;
@@ -37,8 +37,8 @@ export class ReadStream extends Readable {
   _read(n: number): void {
     if (this.destroyed) return;
 
-    if (typeof this._writeStream["_fd"] !== "number") {
-      this._writeStream.once("ready", () => this._read(n));
+    if (typeof this._writeStream['_fd'] !== 'number') {
+      this._writeStream.once('ready', () => this._read(n));
       return;
     }
 
@@ -46,7 +46,7 @@ export class ReadStream extends Readable {
     // `bytesRead`, and discard the rest. This prevents node from having to zero
     // out the entire allocation first.
     const buf = new Uint8Array(Buffer.allocUnsafe(n).buffer);
-    read(this._writeStream["_fd"], buf, 0, n, this._pos, (error, bytesRead) => {
+    read(this._writeStream['_fd'], buf, 0, n, this._pos, (error, bytesRead) => {
       if (error) this.destroy(error);
 
       // Push any read bytes into the local stream buffer.
@@ -60,14 +60,14 @@ export class ReadStream extends Readable {
       // then this stream has reached the end.
       if (
         (
-          this._writeStream as any as {
+          this._writeStream as unknown as {
             _writableState: { finished: boolean };
           }
         )._writableState.finished
       ) {
         // Check if we have consumed the whole file up to where
         // the write stream has written before ending the stream
-        if (this._pos < (this._writeStream as any as { _pos: number })._pos)
+        if (this._pos < (this._writeStream as unknown as { _pos: number })._pos)
           this._read(n);
         else this.push(null);
         return;
@@ -75,20 +75,20 @@ export class ReadStream extends Readable {
 
       // Otherwise, wait for the write stream to add more data or finish.
       const retry = (): void => {
-        this._writeStream.off("finish", retry);
-        this._writeStream.off("write", retry);
+        this._writeStream.off('finish', retry);
+        this._writeStream.off('write', retry);
         this._read(n);
       };
 
-      this._writeStream.on("finish", retry);
-      this._writeStream.on("write", retry);
+      this._writeStream.on('finish', retry);
+      this._writeStream.on('write', retry);
     });
   }
 }
 
 export interface WriteStreamOptions {
-  highWaterMark?: WritableOptions["highWaterMark"];
-  defaultEncoding?: WritableOptions["defaultEncoding"];
+  highWaterMark?: WritableOptions['highWaterMark'];
+  defaultEncoding?: WritableOptions['defaultEncoding'];
   tmpdir?: () => string;
 }
 
@@ -115,21 +115,21 @@ export class WriteStream extends Writable {
 
       this._path = join(
         (options?.tmpdir ?? tmpdir)(),
-        `capacitor-${buffer.toString("hex")}.tmp`
+        `capacitor-${buffer.toString('hex')}.tmp`,
       );
 
       // Create a file in the OS's temporary files directory.
-      open(this._path, "wx+", 0o600, (error, fd) => {
+      open(this._path, 'wx+', 0o600, (error, fd) => {
         if (error) {
           this.destroy(error);
           return;
         }
 
         // Cleanup when the process exits or is killed.
-        processExitProxy.once("exit", this._cleanupSync);
+        processExitProxy.once('exit', this._cleanupSync);
 
         this._fd = fd;
-        this.emit("ready");
+        this.emit('ready');
       });
     });
   }
@@ -138,7 +138,7 @@ export class WriteStream extends Writable {
     const fd = this._fd;
     const path = this._path;
 
-    if (typeof fd !== "number" || typeof path !== "string") {
+    if (typeof fd !== 'number' || typeof path !== 'string') {
       callback(null);
       return;
     }
@@ -154,19 +154,19 @@ export class WriteStream extends Writable {
 
         // We avoid removing this until now in case an exit occurs while
         // asyncronously cleaning up.
-        processExitProxy.off("exit", this._cleanupSync);
+        processExitProxy.off('exit', this._cleanupSync);
         callback(unlinkError ?? closeError);
       });
     });
   };
 
   _cleanupSync = (): void => {
-    processExitProxy.off("exit", this._cleanupSync);
+    processExitProxy.off('exit', this._cleanupSync);
 
-    if (typeof this._fd === "number")
+    if (typeof this._fd === 'number')
       try {
         closeSync(this._fd);
-      } catch (error) {
+      } catch {
         // An error here probably means the fd was already closed, but we can
         // still try to unlink the file.
       }
@@ -175,15 +175,15 @@ export class WriteStream extends Writable {
       if (this._path !== null) {
         unlinkSync(this._path);
       }
-    } catch (error) {
+    } catch {
       // If we are unable to unlink the file, the operating system will clean
       // up on next restart, since we use store thes in `os.tmpdir()`
     }
   };
 
-  _final(callback: (error?: null | Error) => any): void {
-    if (typeof this._fd !== "number") {
-      this.once("ready", () => this._final(callback));
+  _final(callback: (error?: null | Error) => unknown): void {
+    if (typeof this._fd !== 'number') {
+      this.once('ready', () => this._final(callback));
       return;
     }
     callback();
@@ -192,17 +192,17 @@ export class WriteStream extends Writable {
   _write(
     chunk: Buffer,
     encoding: string,
-    callback: (error?: null | Error) => any
+    callback: (error?: null | Error) => unknown,
   ): void {
-    if (typeof this._fd !== "number") {
-      this.once("ready", () => this._write(chunk, encoding, callback));
+    if (typeof this._fd !== 'number') {
+      this.once('ready', () => this._write(chunk, encoding, callback));
       return;
     }
 
     const uint8Array = new Uint8Array(
       chunk.buffer,
       chunk.byteOffset,
-      chunk.byteLength
+      chunk.byteLength,
     );
 
     write(this._fd, uint8Array, 0, chunk.length, this._pos, (error) => {
@@ -219,7 +219,7 @@ export class WriteStream extends Writable {
       // the out-of-order writes would still open the potential for read streams
       // to scan positions that have not yet been written.
       this._pos += chunk.length;
-      this.emit("write");
+      this.emit('write');
       callback();
     });
   }
@@ -231,7 +231,7 @@ export class WriteStream extends Writable {
 
   _destroy(
     error: undefined | null | Error,
-    callback: (error?: null | Error) => any
+    callback: (error?: null | Error) => unknown,
   ): void {
     // Destroy all attached read streams.
     for (const readStream of this._readStreams) {
@@ -239,17 +239,17 @@ export class WriteStream extends Writable {
     }
 
     // This capacitor is fully initialized.
-    if (typeof this._fd === "number" && typeof this._path === "string") {
+    if (typeof this._fd === 'number' && typeof this._path === 'string') {
       this._cleanup((cleanupError) => callback(cleanupError ?? error));
       return;
     }
 
     // This capacitor has not yet finished initialization; if initialization
     // does complete, immediately clean up after.
-    this.once("ready", () => {
+    this.once('ready', () => {
       this._cleanup((cleanupError) => {
         if (cleanupError) {
-          this.emit("error", cleanupError);
+          this.emit('error', cleanupError);
         }
       });
     });
@@ -260,18 +260,18 @@ export class WriteStream extends Writable {
   createReadStream(options?: ReadStreamOptions): ReadStream {
     if (this.destroyed)
       throw new ReadAfterDestroyedError(
-        "A ReadStream cannot be created from a destroyed WriteStream."
+        'A ReadStream cannot be created from a destroyed WriteStream.',
       );
 
     if (this._released)
       throw new ReadAfterReleasedError(
-        "A ReadStream cannot be created from a released WriteStream."
+        'A ReadStream cannot be created from a released WriteStream.',
       );
 
     const readStream = new ReadStream(this, options);
     this._readStreams.add(readStream);
 
-    readStream.once("close", (): void => {
+    readStream.once('close', (): void => {
       this._readStreams.delete(readStream);
 
       if (this._released && this._readStreams.size === 0) {

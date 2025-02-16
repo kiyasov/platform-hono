@@ -1,1 +1,1 @@
-export { UploadField } from "./file-fields";
+export { UploadField } from './file-fields';

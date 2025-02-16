@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriverConfig } from '@nestjs/apollo';
+import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
 import { Context } from 'graphql-ws';
-import { AuthorsResolver } from './graphql/authors/authors.resolver';
 import { join } from 'node:path';
 
-import { PubSub } from 'graphql-subscriptions';
 import { HonoGraphQLDriver } from '../../dist/cjs';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthorsResolver } from './graphql/authors/authors.resolver';
 
 @Module({
   imports: [

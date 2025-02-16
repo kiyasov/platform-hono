@@ -1,1 +1,1 @@
-export * from "./hono-adapter";
+export * from './hono-adapter';

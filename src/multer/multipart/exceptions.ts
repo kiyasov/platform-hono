@@ -9,6 +9,7 @@ export const transformException = (err: Error | undefined) => {
     return err;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const code: string = (err as any).code;
 
   switch (code) {

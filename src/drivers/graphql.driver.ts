@@ -1,21 +1,22 @@
-import { ApolloServer, BaseContext, HeaderMap } from "@apollo/server";
-import { ModulesContainer } from "@nestjs/core";
+import { ApolloServer, BaseContext, HeaderMap } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloDriverConfig } from '@nestjs/apollo';
+import { Logger } from '@nestjs/common';
+import { ModulesContainer } from '@nestjs/core';
 import {
   AbstractGraphQLDriver,
   GqlSubscriptionService,
   SubscriptionConfig,
-} from "@nestjs/graphql";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { ApolloDriverConfig } from "@nestjs/apollo";
-import { Context, HonoRequest } from "hono";
-import { StatusCode } from "hono/utils/http-status";
-import { Logger } from "@nestjs/common";
+} from '@nestjs/graphql';
+import { Context, HonoRequest } from 'hono';
+import { StatusCode } from 'hono/utils/http-status';
 
-import { PluginsExplorerService } from "./services/plugins-explorer.service";
-import { processRequest } from "./graphQLUpload";
+import { processRequest } from './graphQLUpload';
+import { PluginsExplorerService } from './services/plugins-explorer.service';
 
 export class HonoGraphQLDriver<
-  T extends Record<string, any> = ApolloDriverConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends Record<string, any> = ApolloDriverConfig,
 > extends AbstractGraphQLDriver {
   protected apolloServer: ApolloServer<BaseContext>;
   private _subscriptionService?: GqlSubscriptionService;
@@ -34,15 +35,15 @@ export class HonoGraphQLDriver<
     const { httpAdapter } = this.httpAdapterHost;
     const platformName = httpAdapter.getType();
 
-    if (platformName !== "hono") {
-      throw new Error("This driver is only compatible with the Hono platform");
+    if (platformName !== 'hono') {
+      throw new Error('This driver is only compatible with the Hono platform');
     }
 
     await this.registerHono(options);
 
     if (options.installSubscriptionHandlers || options.subscriptions) {
       const subscriptionsOptions: SubscriptionConfig =
-        options.subscriptions || { "subscriptions-transport-ws": {} };
+        options.subscriptions || { 'subscriptions-transport-ws': {} };
       this._subscriptionService = new GqlSubscriptionService(
         {
           schema: options.schema,
@@ -50,14 +51,14 @@ export class HonoGraphQLDriver<
           context: options.context,
           ...subscriptionsOptions,
         },
-        this.httpAdapterHost.httpAdapter?.getHttpServer()
+        this.httpAdapterHost.httpAdapter?.getHttpServer(),
       );
     }
   }
 
   protected async registerHono(
     options: T,
-    { preStartHook }: { preStartHook?: () => void } = {}
+    { preStartHook }: { preStartHook?: () => void } = {},
   ) {
     const { path, typeDefs, resolvers, schema } = options;
     const { httpAdapter } = this.httpAdapterHost;
@@ -109,7 +110,7 @@ export class HonoGraphQLDriver<
 
       ctx.status(status === undefined ? 200 : (status as StatusCode));
 
-      if (body.kind === "complete") {
+      if (body.kind === 'complete') {
         return ctx.body(body.string);
       }
 
@@ -123,7 +124,7 @@ export class HonoGraphQLDriver<
       });
 
       return new Response(readableStream, {
-        headers: { "Content-Type": "application/octet-stream" },
+        headers: { 'Content-Type': 'application/octet-stream' },
       });
     });
 
@@ -143,15 +144,15 @@ export class HonoGraphQLDriver<
 
   private async parseBody(ctx: Context): Promise<Record<string, unknown>> {
     const req = ctx.req;
-    const contentType = req.header("content-type");
+    const contentType = req.header('content-type');
 
-    if (contentType === "application/graphql")
+    if (contentType === 'application/graphql')
       return { query: await req.text() };
-    if (contentType === "application/json")
+    if (contentType === 'application/json')
       return req.json().catch(this.logError);
-    if (contentType === "application/x-www-form-urlencoded")
+    if (contentType === 'application/x-www-form-urlencoded')
       return this.parseFormURL(req);
-    if (contentType?.startsWith("multipart/form-data")) {
+    if (contentType?.startsWith('multipart/form-data')) {
       return processRequest(ctx);
     }
     return {};

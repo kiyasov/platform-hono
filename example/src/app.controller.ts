@@ -13,13 +13,11 @@ import {
   Param,
   Query,
   Ip,
-  HostParam,
   All,
-  Res,
   Header,
 } from '@nestjs/common';
-import { AppService } from './app.service';
 import { readFile } from 'fs/promises';
+
 import {
   FileFieldsInterceptor,
   FileInterceptor,
@@ -29,7 +27,27 @@ import {
   HonoRequest,
   MemoryStorageFile,
 } from '../../dist/cjs';
-import { Context } from 'hono';
+import { AppService } from './app.service';
+
+// setInterval(() => {
+//   const body = new FormData();
+//   const file = Bun.file('');
+//   body.append('files', file);
+//   fetch('http://localhost:3000/uploadFiles', {
+//     method: 'POST',
+//     body,
+//   });
+// }, 10);
+
+// setInterval(() => {
+//   const memoryUsage = process.memoryUsage();
+//   console.log({
+//     rss: (memoryUsage.rss / 1024 / 1024).toFixed(2) + ' MB', // Резерв памяти процесса
+//     heapTotal: (memoryUsage.heapTotal / 1024 / 1024).toFixed(2) + ' MB', // Всего памяти для кучи
+//     heapUsed: (memoryUsage.heapUsed / 1024 / 1024).toFixed(2) + ' MB', // Используемая память кучи
+//     external: (memoryUsage.external / 1024 / 1024).toFixed(2) + ' MB', // Используемая память C++ объектов и буферов
+//   });
+// }, 5000);
 
 @Controller()
 export class AppController {
@@ -115,9 +133,8 @@ export class AppController {
   uploadFiles(
     @Body() body: Record<string, unknown>,
     @UploadedFiles() files: MemoryStorageFile[],
-  ): string {
-    this.logger.debug({ body, files });
-    return 'uploadFiles';
+  ) {
+    return this.appService.uploadFiles(body, files);
   }
 
   @Post('/uploadFile')

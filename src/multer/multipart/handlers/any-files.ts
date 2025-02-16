@@ -1,16 +1,18 @@
-import { UploadOptions } from "../options";
-import { StorageFile } from "../../storage";
-import { THonoRequest, getParts } from "../request";
-import { removeStorageFiles } from "../file";
-import { filterUpload } from "../filter";
+import { BodyData } from 'hono/utils/body';
+
+import { StorageFile } from '../../storage';
+import { removeStorageFiles } from '../file';
+import { filterUpload } from '../filter';
+import { UploadOptions } from '../options';
+import { THonoRequest, getParts } from '../request';
 
 export const handleMultipartAnyFiles = async (
   req: THonoRequest,
-  options: UploadOptions
+  options: UploadOptions,
 ) => {
   const parts = getParts(req, options);
 
-  const body: Record<string, any> = {};
+  const body: BodyData = {};
 
   const files: StorageFile[] = [];
 
