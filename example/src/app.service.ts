@@ -18,7 +18,7 @@ export class AppService {
     for (const file of files) {
       delete file.buffer;
     }
-    await sleep(25000);
-    return 'uploadFiles';
+
+    return files;
   }
 }

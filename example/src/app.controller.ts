@@ -129,7 +129,7 @@ export class AppController {
   }
 
   @Post('/uploadFiles')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FilesInterceptor('files', 10))
   uploadFiles(
     @Body() body: Record<string, unknown>,
     @UploadedFiles() files: MemoryStorageFile[],

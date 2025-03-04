@@ -24,27 +24,41 @@ export const handleMultipartMultipleFiles = async (
 
   try {
     for await (const [partFieldName, part] of Object.entries(parts)) {
-      if (!(part instanceof File)) {
+      if (!(part instanceof File || Array.isArray(part))) {
         body[partFieldName] = part;
         continue;
       }
 
-      if (partFieldName !== fieldname) {
-        throw new BadRequestException(
-          `Field ${partFieldName} doesn't accept files`,
+      const partArray = Array.isArray(part) ? part : [part];
+
+      for (const singlePart of partArray) {
+        if (!(singlePart instanceof File)) {
+          throw new BadRequestException(
+            `Field ${partFieldName} contains invalid file data`,
+          );
+        }
+
+        if (partFieldName !== fieldname) {
+          throw new BadRequestException(
+            `Field ${partFieldName} doesn't accept files`,
+          );
+        }
+
+        if (files.length >= maxCount) {
+          throw new BadRequestException(
+            `Field ${partFieldName} accepts max ${maxCount} files`,
+          );
+        }
+
+        const file = await options.storage!.handleFile(
+          singlePart,
+          req,
+          partFieldName,
         );
-      }
 
-      if (files.length + 1 > maxCount) {
-        throw new BadRequestException(
-          `Field ${partFieldName} accepts max ${maxCount} files`,
-        );
-      }
-
-      const file = await options.storage!.handleFile(part, req, partFieldName);
-
-      if (await filterUpload(options, req, file)) {
-        files.push(file);
+        if (await filterUpload(options, req, file)) {
+          files.push(file);
+        }
       }
     }
   } catch (error) {
