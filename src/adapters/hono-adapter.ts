@@ -15,17 +15,17 @@ import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter';
 import { Context, Next, Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
+import { Data } from 'hono/dist/types/context';
 import { RedirectStatusCode, StatusCode } from 'hono/utils/http-status';
 import * as http from 'http';
-import { Http2SecureServer, Http2Server } from 'http2';
+import http2 from 'http2';
 import * as https from 'https';
-import { Server } from 'node:net';
 
 import { HonoRequest, TypeBodyParser } from '../interfaces';
 
 type HonoHandler = RequestHandler<HonoRequest, Context>;
 
-type ServerType = Server | Http2Server | Http2SecureServer;
+type ServerType = http.Server | http2.Http2Server | http2.Http2SecureServer;
 type Ctx = Context | (() => Promise<Context>);
 
 /**
@@ -56,23 +56,25 @@ export class HonoAdapter extends AbstractHttpAdapter<
   ): [string, HonoHandler] {
     const path = typeof pathOrHandler === 'function' ? '' : pathOrHandler;
     handler = typeof pathOrHandler === 'function' ? pathOrHandler : handler;
+
     return [path, handler];
   }
 
   private createRouteHandler(routeHandler: HonoHandler) {
     return async (ctx: Context, next: Next) => {
       ctx.req['params'] = ctx.req.param();
+
       await routeHandler(ctx.req, ctx, next);
-      return this.send(ctx);
+
+      return ctx.res;
     };
   }
 
-  private async send(ctx: Ctx) {
+  private async getBody(ctx: Ctx, body?: Data) {
     if (typeof ctx === 'function') {
       ctx = await ctx();
     }
 
-    const body = ctx.get('body');
     let responseContentType = await this.getHeader(ctx, 'Content-Type');
 
     if (!responseContentType || responseContentType.startsWith('text/plain')) {
@@ -90,6 +92,8 @@ export class HonoAdapter extends AbstractHttpAdapter<
       typeof body === 'object'
     ) {
       return ctx.json(body);
+    } else if (body === undefined) {
+      return ctx.newResponse(null);
     }
 
     return ctx.body(body);
@@ -108,6 +112,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       pathOrHandler,
       handler,
     );
+
     this.instance.get(routePath, this.createRouteHandler(routeHandler));
   }
 
@@ -165,7 +170,9 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx = await ctx();
     }
 
-    if (statusCode) ctx.status(statusCode);
+    if (statusCode) {
+      ctx.status(statusCode);
+    }
 
     const responseContentType = await this.getHeader(ctx, 'Content-Type');
 
@@ -179,7 +186,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       this.setHeader(ctx, 'Content-Type', 'application/json');
     }
 
-    ctx.set('body', body);
+    ctx.res = await this.getBody(ctx, body);
   }
 
   public async status(ctx: Ctx, statusCode: StatusCode) {
@@ -187,7 +194,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx = await ctx();
     }
 
-    ctx.status(statusCode);
+    return ctx.status(statusCode);
   }
 
   public async end() {
@@ -203,20 +210,22 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx = await ctx();
     }
 
-    ctx.redirect(url, statusCode);
+    ctx.res = ctx.redirect(url, statusCode);
   }
 
   public setErrorHandler(handler: ErrorHandler) {
     this.instance.onError(async (err: Error, ctx: Context) => {
       await handler(err, ctx.req, ctx);
-      return this.send(ctx);
+
+      return this.getBody(ctx);
     });
   }
 
   public setNotFoundHandler(handler: RequestHandler) {
     this.instance.notFound(async (ctx: Context) => {
       await handler(ctx.req, ctx);
-      return this.send(ctx);
+
+      return this.getBody(ctx);
     });
   }
 

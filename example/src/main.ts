@@ -1,6 +1,6 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 
-import { HonoAdapter } from '../../dist/cjs';
+import { HonoAdapter } from '../../src/adapters';
 import { NestHonoApplication } from '../../src/interfaces';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './filters/all-exception.filter';

@@ -15,8 +15,11 @@ import {
   Ip,
   All,
   Header,
+  Redirect,
+  Res,
 } from '@nestjs/common';
 import { readFile } from 'fs/promises';
+import { Context } from 'hono';
 
 import {
   FileFieldsInterceptor,
@@ -102,6 +105,17 @@ export class AppController {
   ) {
     this.logger.debug({ body, userAgent });
     return 'Post';
+  }
+
+  @Get('/redirectCtx')
+  redirectCtx(@Res() ctx: Context) {
+    ctx.res = ctx.redirect('/', 302);
+  }
+
+  @Get('/redirect')
+  @Redirect('/')
+  redirect() {
+    return { url: '/' };
   }
 
   @Post('/uploadFileFields')
