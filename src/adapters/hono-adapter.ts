@@ -343,9 +343,11 @@ export class HonoAdapter extends AbstractHttpAdapter<
         contentType?.startsWith('application/x-www-form-urlencoded')
       ) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.req as any).body = await ctx.req.parseBody({
-          all: true,
-        });
+        (ctx.req as any).body = await ctx.req
+          .parseBody({
+            all: true,
+          })
+          .catch(() => {});
       } else if (
         contentType?.startsWith('application/json') ||
         contentType?.startsWith('text/plain')
@@ -355,7 +357,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
           (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.req as any).body = await ctx.req.json();
+        (ctx.req as any).body = await ctx.req.json().catch(() => {});
       }
 
       await next();
