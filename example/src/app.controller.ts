@@ -63,6 +63,11 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('/error')
+  error(@Res() res: Context) {
+    res.res = res.body('Error', 404);
+  }
+
   @Get('/json')
   getJson(): Record<string, unknown> {
     return { message: 'Hello World!' };

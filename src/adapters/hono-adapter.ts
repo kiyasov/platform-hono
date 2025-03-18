@@ -65,8 +65,6 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ctx.req['params'] = ctx.req.param();
 
       await routeHandler(ctx.req, ctx, next);
-
-      return ctx.res;
     };
   }
 
