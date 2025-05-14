@@ -246,7 +246,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return ctx.finalized;
   }
 
-  public async getHeader?(ctx: Ctx, name: string) {
+  public async getHeader(ctx: Ctx, name: string) {
     if (typeof ctx === 'function') {
       ctx = await ctx();
     }
@@ -262,7 +262,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
     ctx.res.headers.set(name, value);
   }
 
-  public async appendHeader?(ctx: Ctx, name: string, value: string) {
+  public async appendHeader(ctx: Ctx, name: string, value: string) {
     if (typeof ctx === 'function') {
       ctx = await ctx();
     }
