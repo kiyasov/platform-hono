@@ -1,6 +1,6 @@
 {
   "name": "@kiyasov/platform-hono",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Nest adapter for Hono",
   "author": "Islam Kiiasov",
   "repository": {
@@ -28,38 +28,38 @@
     "access": "public"
   },
   "dependencies": {
-    "@apollo/server": "^4.11.3",
-    "@hono/node-server": "^1.13.8",
-    "@nestjs/apollo": "^13.0.2",
-    "@nestjs/graphql": "^13.0.2",
-    "hono": "^4.7.1"
+    "@apollo/server": "^4.12.0",
+    "@hono/node-server": "^1.14.1",
+    "@nestjs/apollo": "^13.1.0",
+    "@nestjs/graphql": "^13.1.0",
+    "hono": "^4.7.9"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@nestjs/cli": "^11.0.2",
-    "@nestjs/common": "^11.0.9",
-    "@nestjs/core": "^11.0.9",
-    "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.10.16",
-    "@types/autocannon": "^7.12.6",
-    "@types/bun": "^1.2.2",
+    "@eslint/js": "^9.26.0",
+    "@nestjs/cli": "^11.0.7",
+    "@nestjs/common": "^11.1.1",
+    "@nestjs/core": "^11.1.1",
+    "@swc/cli": "^0.7.7",
+    "@swc/core": "^1.11.24",
+    "@types/autocannon": "^7.12.7",
+    "@types/bun": "^1.2.13",
     "@types/busboy": "^1.5.4",
     "autocannon": "^8.0.0",
-    "bun": "^1.2.2",
-    "eslint": "^9.20.1",
-    "eslint-config-prettier": "^10.0.1",
-    "eslint-plugin-perfectionist": "^4.9.0",
-    "eslint-plugin-prettier": "^5.2.3",
-    "globals": "^15.15.0",
-    "graphql": "^16.10.0",
+    "bun": "^1.2.13",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-perfectionist": "^4.13.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "globals": "^16.1.0",
+    "graphql": "^16.11.0",
     "graphql-subscriptions": "^3.0.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.5.3",
     "reflect-metadata": "^0.2.2",
     "rimraf": "^6.0.1",
-    "rxjs": "^7.8.1",
+    "rxjs": "^7.8.2",
     "tsc": "^2.0.4",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
   },
   "scripts": {
     "build:esm": "bun ./node_modules/typescript/bin/tsc --p tsconfig.esm.json",
@@ -71,5 +71,9 @@
     "benchmark:bun": "bun dev:bun & ( sleep 5 && autocannon -c 200 -d 5 -p 10 http://localhost:3000 )",
     "benchmark:bun:file": "bun run dev:bun & ( sleep 5 && bun run ./benchmarks/benchmark.mjs)",
     "benchmark:node:file": "bun run dev  & ( sleep 5 && node ./benchmarks/benchmark.mjs)"
-  }
+  },
+  "trustedDependencies": [
+    "@nestjs/core",
+    "@swc/core"
+  ]
 }
