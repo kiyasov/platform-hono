@@ -4,6 +4,7 @@ import { HonoAdapter } from '../../src/adapters';
 import { NestHonoApplication } from '../../src/interfaces';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './filters/all-exception.filter';
+import { NotFoundFilter } from './filters/not-found.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestHonoApplication>(
@@ -23,7 +24,11 @@ async function bootstrap() {
   app.useBodyParser('text/plain', 50 * 1024 * 1024);
 
   const httpAdapter = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+
+  app.useGlobalFilters(
+    new AllExceptionsFilter(httpAdapter),
+    new NotFoundFilter(httpAdapter),
+  );
 
   await app.listen(3000);
 }

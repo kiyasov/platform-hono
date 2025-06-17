@@ -224,8 +224,9 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public setNotFoundHandler(handler: RequestHandler) {
     this.instance.notFound(async (ctx: Context) => {
       await handler(ctx.req, ctx);
+      await this.status(ctx, HttpStatus.NOT_FOUND);
 
-      return this.getBody(ctx);
+      return this.getBody(ctx, 'Not Found');
     });
   }
 
