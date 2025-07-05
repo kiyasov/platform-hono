@@ -20,6 +20,7 @@ import {
 } from '@nestjs/common';
 import { readFile } from 'fs/promises';
 import { Context } from 'hono';
+import { stream } from 'hono/streaming';
 
 import {
   FileFieldsInterceptor,
@@ -121,6 +122,22 @@ export class AppController {
   @Redirect('/')
   redirect() {
     return { url: '/' };
+  }
+
+  @Get('/streamBuffer')
+  async streamBuffer(@Res() ctx: Context) {
+    const file = Bun.file(process.cwd() + '/images/j.jpeg');
+    const buffer = await file.bytes();
+    ctx.res = stream(ctx, async (stream) => {
+      await stream.write(buffer);
+    });
+  }
+
+  @Get('/stream')
+  async stream(@Res() ctx: Context) {
+    const file = Bun.file(process.cwd() + '/images/j.jpeg');
+
+    ctx.res = ctx.body(file.stream());
   }
 
   @Post('/uploadFileFields')
