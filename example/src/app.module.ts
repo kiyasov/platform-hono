@@ -9,6 +9,7 @@ import { HonoGraphQLDriver } from '../../dist/cjs';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthorsResolver } from './graphql/authors/authors.resolver';
+import { SwaggerController } from './swagger.controller';
 
 @Module({
   imports: [
@@ -53,7 +54,7 @@ import { AuthorsResolver } from './graphql/authors/authors.resolver';
       },
     }),
   ],
-  controllers: [AppController],
+  controllers: [AppController, SwaggerController],
   providers: [
     AppService,
     AuthorsResolver,
