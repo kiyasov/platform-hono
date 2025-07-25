@@ -70,10 +70,15 @@ export class HonoAdapter extends AbstractHttpAdapter<
     };
   }
 
-  private async getBody(ctx: Ctx, body?: Data) {
+  private async normalizeContext(ctx: Ctx): Promise<Context> {
     if (typeof ctx === 'function') {
-      ctx = await ctx();
+      return await ctx();
     }
+    return ctx;
+  }
+
+  private async getBody(ctx: Ctx, body?: Data) {
+    ctx = await this.normalizeContext(ctx);
 
     let responseContentType = await this.getHeader(ctx, 'Content-Type');
 
@@ -99,76 +104,88 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return ctx.body(body);
   }
 
-  public all(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
+  private registerRoute(
+    method:
+      | 'all'
+      | 'get'
+      | 'post'
+      | 'put'
+      | 'delete'
+      | 'use'
+      | 'patch'
+      | 'options',
+    pathOrHandler: string | HonoHandler,
+    handler?: HonoHandler,
+  ) {
     const [routePath, routeHandler] = this.getRouteAndHandler(
       pathOrHandler,
       handler,
     );
-    this.instance.all(routePath, this.createRouteHandler(routeHandler));
+    const routeHandler2 = this.createRouteHandler(routeHandler);
+
+    switch (method) {
+      case 'all':
+        this.instance.all(routePath, routeHandler2);
+        break;
+      case 'get':
+        this.instance.get(routePath, routeHandler2);
+        break;
+      case 'post':
+        this.instance.post(routePath, routeHandler2);
+        break;
+      case 'put':
+        this.instance.put(routePath, routeHandler2);
+        break;
+      case 'delete':
+        this.instance.delete(routePath, routeHandler2);
+        break;
+      case 'use':
+        this.instance.use(routePath, routeHandler2);
+        break;
+      case 'patch':
+        this.instance.patch(routePath, routeHandler2);
+        break;
+      case 'options':
+        this.instance.options(routePath, routeHandler2);
+        break;
+    }
+  }
+
+  public all(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
+    this.registerRoute('all', pathOrHandler, handler);
   }
 
   public get(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-
-    this.instance.get(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('get', pathOrHandler, handler);
   }
 
   public post(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.post(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('post', pathOrHandler, handler);
   }
 
   public put(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.put(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('put', pathOrHandler, handler);
   }
 
   public delete(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.delete(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('delete', pathOrHandler, handler);
   }
 
   public use(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.use(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('use', pathOrHandler, handler);
   }
 
   public patch(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.patch(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('patch', pathOrHandler, handler);
   }
 
   public options(pathOrHandler: string | HonoHandler, handler?: HonoHandler) {
-    const [routePath, routeHandler] = this.getRouteAndHandler(
-      pathOrHandler,
-      handler,
-    );
-    this.instance.options(routePath, this.createRouteHandler(routeHandler));
+    this.registerRoute('options', pathOrHandler, handler);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async reply(ctx: Ctx, body: any, statusCode?: StatusCode) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
+    ctx = await this.normalizeContext(ctx);
 
     if (statusCode) {
       ctx.status(statusCode);
@@ -190,10 +207,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async status(ctx: Ctx, statusCode: StatusCode) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     return ctx.status(statusCode);
   }
 
@@ -206,10 +220,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async redirect(ctx: Ctx, statusCode: RedirectStatusCode, url: string) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     ctx.res = ctx.redirect(url, statusCode);
   }
 
@@ -240,42 +251,27 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   public async isHeadersSent(ctx: Ctx): Promise<boolean> {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     return ctx.finalized;
   }
 
   public async getHeader(ctx: Ctx, name: string) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     return ctx.res.headers.get(name);
   }
 
   public async setHeader(ctx: Ctx, name: string, value: string) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     ctx.res.headers.set(name, value);
   }
 
   public async appendHeader(ctx: Ctx, name: string, value: string) {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     ctx.res.headers.append(name, value);
   }
 
   public async getRequestHostname(ctx: Ctx): Promise<string> {
-    if (typeof ctx === 'function') {
-      ctx = await ctx();
-    }
-
+    ctx = await this.normalizeContext(ctx);
     return ctx.req.header().host;
   }
 
@@ -320,46 +316,58 @@ export class HonoAdapter extends AbstractHttpAdapter<
     return new Promise((resolve) => this.httpServer.close(() => resolve()));
   }
 
+  private extractClientIp(ctx: Context): string {
+    return (
+      ctx.req.header('cf-connecting-ip') ??
+      ctx.req.header('x-forwarded-for') ??
+      ctx.req.header('x-real-ip') ??
+      ctx.req.header('forwarded') ??
+      ctx.req.header('true-client-ip') ??
+      ctx.req.header('x-client-ip') ??
+      ctx.req.header('x-cluster-client-ip') ??
+      ctx.req.header('x-forwarded') ??
+      ctx.req.header('forwarded-for') ??
+      ctx.req.header('via')
+    );
+  }
+
+  private async parseRequestBody(
+    ctx: Context,
+    contentType: string,
+    rawBody: boolean,
+  ): Promise<void> {
+    if (
+      contentType?.startsWith('multipart/form-data') ||
+      contentType?.startsWith('application/x-www-form-urlencoded')
+    ) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (ctx.req as any).body = await ctx.req
+        .parseBody({
+          all: true,
+        })
+        .catch(() => {});
+    } else if (
+      contentType?.startsWith('application/json') ||
+      contentType?.startsWith('text/plain')
+    ) {
+      if (rawBody) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (ctx.req as any).body = await ctx.req.json().catch(() => {});
+    }
+  }
+
   public initHttpServer(options: NestApplicationOptions) {
     this.instance.use(async (ctx, next) => {
-      ctx.req['ip'] =
-        ctx.req.header('cf-connecting-ip') ??
-        ctx.req.header('x-forwarded-for') ??
-        ctx.req.header('x-real-ip') ??
-        ctx.req.header('forwarded') ??
-        ctx.req.header('true-client-ip') ??
-        ctx.req.header('x-client-ip') ??
-        ctx.req.header('x-cluster-client-ip') ??
-        ctx.req.header('x-forwarded') ??
-        ctx.req.header('forwarded-for') ??
-        ctx.req.header('via');
+      ctx.req['ip'] = this.extractClientIp(ctx);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ctx.req['query'] = ctx.req.query() as any;
       ctx.req['headers'] = Object.fromEntries(ctx.req.raw.headers);
 
       const contentType = ctx.req.header('content-type');
-
-      if (
-        contentType?.startsWith('multipart/form-data') ||
-        contentType?.startsWith('application/x-www-form-urlencoded')
-      ) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.req as any).body = await ctx.req
-          .parseBody({
-            all: true,
-          })
-          .catch(() => {});
-      } else if (
-        contentType?.startsWith('application/json') ||
-        contentType?.startsWith('text/plain')
-      ) {
-        if (options.rawBody) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (ctx.req as any).rawBody = Buffer.from(await ctx.req.text());
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (ctx.req as any).body = await ctx.req.json().catch(() => {});
-      }
+      await this.parseRequestBody(ctx, contentType, options.rawBody);
 
       await next();
     });
@@ -425,8 +433,9 @@ export class HonoAdapter extends AbstractHttpAdapter<
   public bodyLimit(maxSize: number) {
     return bodyLimit({
       maxSize,
-      onError: () => {
-        throw new Error('Body too large');
+      onError: (ctx) => {
+        const errorMessage = `Body size  exceeded: ${maxSize} bytes. Size: ${ctx.req.header('Content-Length')} bytes. Method: ${ctx.req.method}. Path: ${ctx.req.path}`;
+        throw new Error(errorMessage);
       },
     });
   }
