@@ -3,38 +3,49 @@
 [![NPM version](https://badge.fury.io/js/@kiyasov%2Fplatform-hono.svg)](https://www.npmjs.com/package/@kiyasov/platform-hono)
 [![NPM Downloads](https://img.shields.io/npm/dw/%40kiyasov%2Fplatform-hono)](https://www.npmjs.com/package/@kiyasov/platform-hono)
 
-This package allows you to use Hono with the NestJS framework.
+This package allows you to use [Hono](https://hono.dev/) with [NestJS](https://nestjs.com/).
 
-## Components
+## Installation
 
-- `HonoAdapter`: Adapter to use Hono with NestJS.
-
-## How to Use
-
-### Setup
-
-To install [`@kiyasov/platform-hono`](https://www.npmjs.com/package/@kiyasov/platform-hono):
-
-```shell
+```bash
+# npm
 npm install @kiyasov/platform-hono
-# or
+
+# yarn
 yarn add @kiyasov/platform-hono
+
+# pnpm
+pnpm add @kiyasov/platform-hono
+
+# bun
+bun add @kiyasov/platform-hono
 ```
 
-### Create Application
+## Quick Start
+
+### Basic Setup
 
 ```typescript
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { HonoAdapter } from "@kiyasov/platform-hono";
+import { NestFactory } from '@nestjs/core';
+import { HonoAdapter } from '@kiyasov/platform-hono';
+import { AppModule } from './app.module';
 
-const app = await NestFactory.create<NestHonoApplication>(
-  AppModule,
-  new HonoAdapter()
-);
+async function bootstrap() {
+  const app = await NestFactory.create(
+    AppModule,
+    new HonoAdapter()
+  );
+
+  await app.listen(3000);
+  console.log(`Application is running on: ${await app.getUrl()}`);
+}
+
+bootstrap();
 ```
 
-### Exception filters
+## Examples
+
+### Exception Filter with HonoAdapter
 
 ```typescript
 import {
@@ -43,8 +54,8 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-} from "@nestjs/common";
-import { HttpAdapterHost } from "@nestjs/core";
+} from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -52,7 +63,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
-
     const ctx = host.switchToHttp();
 
     const httpStatus =
@@ -70,3 +80,49 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 }
 ```
+
+
+## Advanced Configuration
+
+### Custom Hono Instance
+
+```typescript
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+
+async function bootstrap() {
+  const honoApp = new Hono();
+
+  // Add Hono middleware
+  honoApp.use('*', cors());
+  honoApp.use('*', logger());
+
+  const app = await NestFactory.create(
+    AppModule,
+    new HonoAdapter(honoApp)
+  );
+
+  await app.listen(3000);
+}
+```
+
+
+
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
+
+## Support
+
+For issues and questions, please use the [GitHub issue tracker](https://github.com/kiyasov/platform-hono/issues).
+
+## Acknowledgments
+
+- [Hono](https://hono.dev/) - The ultrafast web framework
+- [NestJS](https://nestjs.com/) - A progressive Node.js framework

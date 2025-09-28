@@ -46,10 +46,10 @@ import { AppService } from './app.service';
 // setInterval(() => {
 //   const memoryUsage = process.memoryUsage();
 //   console.log({
-//     rss: (memoryUsage.rss / 1024 / 1024).toFixed(2) + ' MB', // Резерв памяти процесса
-//     heapTotal: (memoryUsage.heapTotal / 1024 / 1024).toFixed(2) + ' MB', // Всего памяти для кучи
-//     heapUsed: (memoryUsage.heapUsed / 1024 / 1024).toFixed(2) + ' MB', // Используемая память кучи
-//     external: (memoryUsage.external / 1024 / 1024).toFixed(2) + ' MB', // Используемая память C++ объектов и буферов
+//     rss: (memoryUsage.rss / 1024 / 1024).toFixed(2) + ' MB', // Process memory reserve
+//     heapTotal: (memoryUsage.heapTotal / 1024 / 1024).toFixed(2) + ' MB', // Total heap memory
+//     heapUsed: (memoryUsage.heapUsed / 1024 / 1024).toFixed(2) + ' MB', // Used heap memory
+//     external: (memoryUsage.external / 1024 / 1024).toFixed(2) + ' MB', // Used memory for C++ objects and buffers
 //   });
 // }, 5000);
 
