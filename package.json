@@ -8,6 +8,20 @@
     "url": "https://github.com/kiyasov/platform-hono"
   },
   "license": "MIT",
+  "keywords": [
+    "nestjs",
+    "nest",
+    "hono",
+    "adapter",
+    "platform",
+    "http",
+    "web",
+    "framework",
+    "server",
+    "rest",
+    "api",
+    "typescript"
+  ],
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "exports": {

@@ -1,29 +1,36 @@
-# Hono NestJS Adapter
+# 🚀 Hono NestJS Adapter
 
-[![NPM version](https://badge.fury.io/js/@kiyasov%2Fplatform-hono.svg)](https://www.npmjs.com/package/@kiyasov/platform-hono)
-[![NPM Downloads](https://img.shields.io/npm/dw/%40kiyasov%2Fplatform-hono)](https://www.npmjs.com/package/@kiyasov/platform-hono)
+<div align="center">
 
-This package allows you to use [Hono](https://hono.dev/) with [NestJS](https://nestjs.com/).
+[![NPM version](https://img.shields.io/npm/v/@kiyasov/platform-hono.svg?style=flat-square)](https://www.npmjs.com/package/@kiyasov/platform-hono)
+[![NPM Downloads](https://img.shields.io/npm/dm/@kiyasov/platform-hono.svg?style=flat-square)](https://www.npmjs.com/package/@kiyasov/platform-hono)
+[![License](https://img.shields.io/npm/l/@kiyasov/platform-hono.svg?style=flat-square)](https://github.com/kiyasov/platform-hono/blob/main/LICENSE)
 
-## Installation
+**Use [Hono](https://hono.dev/) with [NestJS](https://nestjs.com/)**
+
+</div>
+
+---
+
+## 📦 Installation
 
 ```bash
-# npm
 npm install @kiyasov/platform-hono
+```
 
-# yarn
+```bash
 yarn add @kiyasov/platform-hono
+```
 
-# pnpm
+```bash
 pnpm add @kiyasov/platform-hono
+```
 
-# bun
+```bash
 bun add @kiyasov/platform-hono
 ```
 
-## Quick Start
-
-### Basic Setup
+## ⚡ Quick Start
 
 ```typescript
 import { NestFactory } from '@nestjs/core';
@@ -43,7 +50,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-## Examples
+## 🎯 Usage Examples
 
 ### Exception Filter with HonoAdapter
 
@@ -81,9 +88,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 }
 ```
 
-
-## Advanced Configuration
-
 ### Custom Hono Instance
 
 ```typescript
@@ -107,22 +111,21 @@ async function bootstrap() {
 }
 ```
 
+## 📚 Documentation
 
+For more examples and detailed documentation, check out the [example](./example) directory.
 
-
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+## 📄 License
 
-MIT
+MIT © [Islam Kiiasov](https://github.com/kiyasov)
 
-## Support
+## 🔗 Links
 
-For issues and questions, please use the [GitHub issue tracker](https://github.com/kiyasov/platform-hono/issues).
-
-## Acknowledgments
-
-- [Hono](https://hono.dev/) - The ultrafast web framework
-- [NestJS](https://nestjs.com/) - A progressive Node.js framework
+- [NPM Package](https://www.npmjs.com/package/@kiyasov/platform-hono)
+- [GitHub Repository](https://github.com/kiyasov/platform-hono)
+- [Hono Framework](https://hono.dev/)
+- [NestJS Framework](https://nestjs.com/)
