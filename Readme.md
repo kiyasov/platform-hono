@@ -38,10 +38,7 @@ import { HonoAdapter } from '@kiyasov/platform-hono';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(
-    AppModule,
-    new HonoAdapter()
-  );
+  const app = await NestFactory.create(AppModule, new HonoAdapter());
 
   await app.listen(3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
@@ -85,29 +82,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
   }
-}
-```
-
-### Custom Hono Instance
-
-```typescript
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-
-async function bootstrap() {
-  const honoApp = new Hono();
-
-  // Add Hono middleware
-  honoApp.use('*', cors());
-  honoApp.use('*', logger());
-
-  const app = await NestFactory.create(
-    AppModule,
-    new HonoAdapter(honoApp)
-  );
-
-  await app.listen(3000);
 }
 ```
 
