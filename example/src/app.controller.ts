@@ -145,8 +145,8 @@ export class AppController {
     FileFieldsInterceptor(
       [
         {
-          name: 'file',
-          maxCount: 1,
+          name: 'image',
+          maxCount: 5,
         },
       ],
       {

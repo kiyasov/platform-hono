@@ -1,10 +1,11 @@
-import { Args, Mutation, Query, Subscription } from '@nestjs/graphql';
-import { Author } from './dto/author';
-import { PubSub } from 'graphql-subscriptions';
 import { Inject } from '@nestjs/common';
-import { FileUpload, GraphQLUpload } from '../../../../dist/cjs';
+import { Args, Mutation, Query, Subscription } from '@nestjs/graphql';
 import fs from 'fs';
+import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
+
+import { FileUpload, GraphQLUpload } from '../../../../dist/cjs';
+import { Author } from './dto/author';
 
 export class AuthorsResolver {
   constructor(@Inject('PUB_SUB') private pubSub: PubSub) {}
