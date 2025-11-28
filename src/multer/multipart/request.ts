@@ -34,7 +34,7 @@ export const getParts = (
   req: THonoRequest,
   options: UploadOptions,
 ): BodyData => {
-  const parts = req.body;
+  const parts = req.body ?? {};
 
   for (const [key, file] of Object.entries(parts)) {
     if (file instanceof File) {
