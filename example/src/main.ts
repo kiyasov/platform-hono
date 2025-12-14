@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 
 import { HonoAdapter } from '../../src/adapters';
@@ -31,6 +32,8 @@ async function bootstrap() {
   );
 
   await app.listen(3000);
+
+  Logger.log(`Application is running on: http://localhost:3000`);
 }
 bootstrap();
 

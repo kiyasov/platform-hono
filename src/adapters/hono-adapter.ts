@@ -11,6 +11,7 @@ import {
   NestApplicationOptions,
   RequestHandler,
 } from '@nestjs/common/interfaces';
+import { isObject } from '@nestjs/common/utils/shared.utils';
 import { AbstractHttpAdapter } from '@nestjs/core/adapters/http-adapter';
 import { Context, Next, Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
@@ -24,9 +25,17 @@ import * as https from 'https';
 import { HonoRequest, TypeBodyParser } from '../interfaces';
 
 type HonoHandler = RequestHandler<HonoRequest, Context>;
-
 type ServerType = http.Server | http2.Http2Server | http2.Http2SecureServer;
 type Ctx = Context | (() => Promise<Context>);
+type Method =
+  | 'all'
+  | 'get'
+  | 'post'
+  | 'put'
+  | 'delete'
+  | 'use'
+  | 'patch'
+  | 'options';
 
 /**
  * Adapter for using Hono with NestJS.
@@ -80,22 +89,28 @@ export class HonoAdapter extends AbstractHttpAdapter<
   private async getBody(ctx: Ctx, body?: Data) {
     ctx = await this.normalizeContext(ctx);
 
+    if (body === undefined && ctx.res && ctx.res.body !== null) {
+      return ctx.res;
+    }
+
     let responseContentType = await this.getHeader(ctx, 'Content-Type');
 
     if (!responseContentType || responseContentType.startsWith('text/plain')) {
-      if (body instanceof Buffer) {
+      if (
+        body instanceof Buffer ||
+        body instanceof Uint8Array ||
+        body instanceof ArrayBuffer ||
+        body instanceof ReadableStream
+      ) {
         responseContentType = 'application/octet-stream';
-      } else if (typeof body === 'object') {
+      } else if (isObject(body)) {
         responseContentType = 'application/json';
       }
 
-      this.setHeader(ctx, 'Content-Type', responseContentType);
+      await this.setHeader(ctx, 'Content-Type', responseContentType);
     }
 
-    if (
-      responseContentType === 'application/json' &&
-      typeof body === 'object'
-    ) {
+    if (responseContentType === 'application/json' && isObject(body)) {
       return ctx.json(body);
     } else if (body === undefined) {
       return ctx.newResponse(null);
@@ -105,15 +120,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
   }
 
   private registerRoute(
-    method:
-      | 'all'
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'use'
-      | 'patch'
-      | 'options',
+    method: Method,
     pathOrHandler: string | HonoHandler,
     handler?: HonoHandler,
   ) {
@@ -189,18 +196,6 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
     if (statusCode) {
       ctx.status(statusCode);
-    }
-
-    const responseContentType = await this.getHeader(ctx, 'Content-Type');
-
-    if (
-      !responseContentType?.startsWith('application/json') &&
-      body?.statusCode >= HttpStatus.BAD_REQUEST
-    ) {
-      Logger.warn(
-        "Content-Type doesn't match Reply body, you might need a custom ExceptionFilter for non-JSON responses",
-      );
-      this.setHeader(ctx, 'Content-Type', 'application/json');
     }
 
     ctx.res = await this.getBody(ctx, body);

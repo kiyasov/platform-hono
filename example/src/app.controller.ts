@@ -64,6 +64,11 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('/catch-error')
+  catchError() {
+    throw new Error('Some error');
+  }
+
   @Get('/error')
   error(@Res() res: Context) {
     res.res = res.body('Error', 404);
@@ -93,8 +98,17 @@ export class AppController {
     return `User ${userId}`;
   }
 
+  @Get('/custom-response')
+  customResponse(@Res() ctx: Context) {
+    ctx.res.headers.set('X-Custom-Header', 'CustomValue');
+    ctx.res = new Response('Custom Response Body', {
+      status: 202,
+      headers: ctx.res.headers,
+    });
+  }
+
   @Get('/ip')
-  getIP(@Ip() ip: string): string {
+  getIP(@Ip() ip: string) {
     return `IP ${ip}`;
   }
 
@@ -128,9 +142,17 @@ export class AppController {
   async streamBuffer(@Res() ctx: Context) {
     const file = Bun.file(process.cwd() + '/images/j.jpeg');
     const buffer = await file.bytes();
+    ctx.res.headers.set('Content-Type', 'image/jpeg');
     ctx.res = stream(ctx, async (stream) => {
       await stream.write(buffer);
     });
+  }
+
+  @Get('/bytes')
+  async bytes() {
+    const file = Bun.file(process.cwd() + '/images/j.jpeg');
+
+    return file.bytes();
   }
 
   @Get('/stream')
