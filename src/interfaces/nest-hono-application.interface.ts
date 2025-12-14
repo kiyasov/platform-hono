@@ -15,8 +15,9 @@ interface HonoViewOptions {
 /**
  * @publicApi
  */
-export interface NestHonoApplication<TServer extends Hono = Hono>
-  extends INestApplication<TServer> {
+export interface NestHonoApplication<
+  TServer extends Hono = Hono,
+> extends INestApplication<TServer> {
   /**
    * Returns the underlying HTTP adapter bounded to a Hono app.
    *
