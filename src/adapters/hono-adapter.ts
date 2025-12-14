@@ -80,6 +80,10 @@ export class HonoAdapter extends AbstractHttpAdapter<
   private async getBody(ctx: Ctx, body?: Data) {
     ctx = await this.normalizeContext(ctx);
 
+    if (body === undefined && ctx.res && ctx.res.body !== null) {
+      return ctx.res;
+    }
+
     let responseContentType = await this.getHeader(ctx, 'Content-Type');
 
     if (!responseContentType || responseContentType.startsWith('text/plain')) {
