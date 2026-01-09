@@ -1,6 +1,6 @@
 {
   "name": "@kiyasov/platform-hono",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Nest adapter for Hono",
   "author": "Islam Kiiasov",
   "repository": {
@@ -43,13 +43,13 @@
   },
   "dependencies": {
     "@apollo/server": "^5.2.0",
-    "@hono/node-server": "^1.19.7",
+    "@hono/node-server": "^1.19.8",
     "@nestjs/graphql": "^13.2.3",
+    "@nestjs/apollo": "^13.2.3",
     "hono": "^4.11.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@nestjs/apollo": "^13.2.3",
     "@nestjs/cli": "^11.0.14",
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
