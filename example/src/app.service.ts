@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { sleep } from 'bun';
 
 import { MemoryStorageFile } from '../../dist/cjs';
 

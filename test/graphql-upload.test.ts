@@ -13,7 +13,7 @@ import {
   type MemoryStorageFile,
 } from '../src/drivers/graphQLUpload/storage/memory-storage';
 import { Storage } from '../src/drivers/graphQLUpload/storage/storage';
-import { FileUpload, Upload } from '../src/drivers/graphQLUpload/Upload';
+import { MemoryUploadFile, Upload } from '../src/drivers/graphQLUpload/Upload';
 import {
   asContext,
   asHonoRequest,
@@ -34,7 +34,7 @@ describe('GraphQL Upload', () => {
 
     test('should resolve upload with file', async () => {
       const upload = new Upload();
-      const mockFile: FileUpload = {
+      const mockFile: MemoryUploadFile = {
         fieldName: 'file',
         originalFilename: 'test.txt',
         mimetype: 'text/plain',
@@ -392,8 +392,8 @@ describe('GraphQL Upload', () => {
     });
 
     test('should use custom storage when provided', async () => {
-      const customStorage: Storage<FileUpload> = {
-        async handleFile(file, _req, fieldName): Promise<FileUpload> {
+      const customStorage: Storage<MemoryUploadFile> = {
+        async handleFile(file, _req, fieldName): Promise<MemoryUploadFile> {
           return {
             fieldName,
             originalFilename: file.name,

@@ -2,13 +2,13 @@ import { HonoRequest } from 'hono';
 import { Readable } from 'stream';
 
 import { ReadStream, ReadStreamOptions, WriteStream } from '../fs-capacitor';
-import { FileUpload } from '../Upload';
+import { StreamUploadFile } from '../Upload';
 import { Storage, StorageOptions } from './storage';
 
 /**
  * File upload with stream support for capacitor storage
  */
-export interface CapacitorStorageFile extends FileUpload {
+export interface CapacitorStorageFile extends StreamUploadFile {
   /** Original File object */
   file: File;
   /** Creates a readable stream for the file content */
@@ -76,11 +76,7 @@ export class CapacitorStorage implements Storage<CapacitorStorageFile> {
     };
   }
 
-  public async removeFile(
-    file: CapacitorStorageFile,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    force?: boolean,
-  ): Promise<void> {
+  public async removeFile(file: CapacitorStorageFile): Promise<void> {
     file.capacitor.release();
   }
 }

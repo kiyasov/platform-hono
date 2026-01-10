@@ -1,5 +1,5 @@
 // Core
-export { Upload, FileUpload } from './Upload';
+export { Upload, MemoryUploadFile, StreamUploadFile } from './Upload';
 export { GraphQLUpload } from './GraphQLUpload';
 export { processRequest, ProcessRequestOptions } from './processRequest';
 

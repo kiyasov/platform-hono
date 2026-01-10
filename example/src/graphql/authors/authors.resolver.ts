@@ -4,7 +4,7 @@ import fs from 'fs';
 import { PubSub } from 'graphql-subscriptions';
 import { join } from 'path';
 
-import { FileUpload, GraphQLUpload } from '../../../../dist/cjs';
+import { StreamUploadFile, GraphQLUpload } from '../../../../dist/cjs';
 import { Author } from './dto/author';
 
 export class AuthorsResolver {
@@ -12,7 +12,8 @@ export class AuthorsResolver {
 
   @Mutation(() => Boolean)
   async uploadFile(
-    @Args('image', { type: () => GraphQLUpload }) image: Promise<FileUpload>,
+    @Args('image', { type: () => GraphQLUpload })
+    image: Promise<StreamUploadFile>,
   ): Promise<boolean> {
     console.log(image);
     const imageResolved = await image;
@@ -40,7 +41,7 @@ export class AuthorsResolver {
   @Mutation(() => Boolean)
   async uploadFiles(
     @Args('images', { type: () => [GraphQLUpload] })
-    images: Promise<FileUpload>[],
+    images: Promise<StreamUploadFile>[],
   ) {
     // Resolve all promises first
     const files = await Promise.all(images);

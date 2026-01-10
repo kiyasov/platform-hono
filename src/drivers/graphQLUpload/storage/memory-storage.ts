@@ -1,12 +1,12 @@
 import { HonoRequest } from 'hono';
 
-import { FileUpload } from '../Upload';
+import { MemoryUploadFile } from '../Upload';
 import { Storage, StorageOptions } from './storage';
 
 /**
  * In-memory storage file with buffer
  */
-export interface MemoryStorageFile extends FileUpload {
+export interface MemoryStorageFile extends MemoryUploadFile {
   /** Buffer containing the file data */
   buffer: Buffer;
   /** Original File object */
@@ -50,11 +50,7 @@ export class MemoryStorage implements Storage<MemoryStorageFile> {
     };
   }
 
-  public async removeFile(
-    file: MemoryStorageFile,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    force?: boolean,
-  ): Promise<void> {
+  public async removeFile(file: MemoryStorageFile): Promise<void> {
     if ('buffer' in file) {
       delete (file as MemoryStorageFile).buffer;
     }

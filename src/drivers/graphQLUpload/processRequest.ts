@@ -2,14 +2,14 @@ import { Context } from 'hono';
 
 import { CapacitorStorage } from './storage/capacitor-storage';
 import { Storage } from './storage/storage';
-import { FileUpload, Upload } from './Upload';
+import { MemoryUploadFile, Upload } from './Upload';
 
 /**
  * Options for processing GraphQL file uploads
  */
 export interface ProcessRequestOptions {
   /** Storage implementation to use for uploaded files */
-  storage?: Storage<FileUpload>;
+  storage?: Storage<MemoryUploadFile>;
   /** Maximum file size in bytes */
   maxFileSize?: number;
   /** Temporary directory for capacitor storage */
