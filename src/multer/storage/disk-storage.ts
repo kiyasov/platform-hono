@@ -77,7 +77,8 @@ export class DiskStorage
       path,
       mimetype: file.type,
       encoding: 'utf-8',
-      fieldname: fieldName,
+      fieldName: fieldName,
+      uploadedAt: new Date().toISOString(),
     };
   }
 

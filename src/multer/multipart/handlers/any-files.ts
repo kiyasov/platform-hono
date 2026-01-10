@@ -1,41 +1,23 @@
-import { BodyData } from 'hono/utils/body';
-
-import { StorageFile } from '../../storage';
-import { removeStorageFiles } from '../file';
-import { filterUpload } from '../filter';
 import { UploadOptions } from '../options';
-import { THonoRequest, getParts } from '../request';
+import { THonoRequest } from '../request';
+import { FileHandler, MultipleFilesResult } from './base-handler';
 
 export const handleMultipartAnyFiles = async (
   req: THonoRequest,
   options: UploadOptions,
-) => {
-  const parts = getParts(req, options);
+): Promise<MultipleFilesResult> => {
+  const handler = new FileHandler(req, options);
 
-  const body: BodyData = {};
-
-  const files: StorageFile[] = [];
-
-  const removeFiles = async (error?: boolean) => {
-    return await removeStorageFiles(options.storage!, files, error);
-  };
-
-  try {
-    for await (const [partFieldName, part] of Object.entries(parts)) {
-      if (!(part instanceof File)) {
-        body[partFieldName] = part;
-        continue;
-      }
-      const file = await options.storage!.handleFile(part, req, partFieldName);
-
-      if (await filterUpload(options, req, file)) {
-        files.push(file);
-      }
+  await handler.process(async (fieldName, part) => {
+    const storageFile = await handler.handleSingleFile(fieldName, part);
+    if (storageFile) {
+      handler.addFile(fieldName, storageFile);
     }
-  } catch (error) {
-    await removeFiles(true);
-    throw error;
-  }
+  });
 
-  return { body, files, remove: () => removeFiles() };
+  return {
+    body: handler.getBody(),
+    files: handler.getFiles(),
+    remove: handler.createRemoveFunction(),
+  };
 };

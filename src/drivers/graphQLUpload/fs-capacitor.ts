@@ -1,30 +1,65 @@
 import { randomBytes } from 'crypto';
 import { EventEmitter } from 'events';
-import { read, open, closeSync, unlinkSync, write, close, unlink } from 'fs';
+import { close, closeSync, open, read, unlink, unlinkSync, write } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Readable, ReadableOptions, Writable, WritableOptions } from 'stream';
 
-export class ReadAfterDestroyedError extends Error {}
-export class ReadAfterReleasedError extends Error {}
+/**
+ * Error thrown when attempting to create a ReadStream from a destroyed WriteStream.
+ */
+export class ReadAfterDestroyedError extends Error {
+  constructor() {
+    super('A ReadStream cannot be created from a destroyed WriteStream.');
+    this.name = 'ReadAfterDestroyedError';
+  }
+}
 
+/**
+ * Error thrown when attempting to create a ReadStream from a released WriteStream.
+ */
+export class ReadAfterReleasedError extends Error {
+  constructor() {
+    super('A ReadStream cannot be created from a released WriteStream.');
+    this.name = 'ReadAfterReleasedError';
+  }
+}
+
+/**
+ * Options for creating a ReadStream.
+ */
 export interface ReadStreamOptions {
+  /** Maximum number of bytes to store in the internal buffer before ceasing to read from the underlying resource. */
   highWaterMark?: ReadableOptions['highWaterMark'];
+  /** Encoding to use for the readable stream. */
   encoding?: ReadableOptions['encoding'];
 }
 
-// Use a “proxy” event emitter configured to have an infinite maximum number of
-// listeners to prevent Node.js max listeners exceeded warnings if many
-// `fs-capacitor` `ReadStream` instances are created at the same time. See:
-// https://github.com/mike-marcacci/fs-capacitor/issues/30
-const processExitProxy = new EventEmitter();
-processExitProxy.setMaxListeners(Infinity);
-process.once('exit', () => processExitProxy.emit('exit'));
+/**
+ * Proxy event emitter to handle process exit events without triggering max listeners warnings.
+ */
+const PROCESS_EXIT_PROXY = new EventEmitter();
+PROCESS_EXIT_PROXY.setMaxListeners(Infinity);
+process.once('exit', () => PROCESS_EXIT_PROXY.emit('exit'));
 
+interface WritableState {
+  finished: boolean;
+}
+
+/**
+ * A readable stream that reads from a WriteStream's temporary file.
+ * Allows multiple concurrent reads from the same WriteStream.
+ */
 export class ReadStream extends Readable {
-  private _pos: number = 0;
-  private _writeStream: WriteStream;
+  private _pos = 0;
+  private readonly _writeStream: WriteStream;
+  private _retryListenersAttached = false;
 
+  /**
+   * Creates a new ReadStream attached to a WriteStream.
+   * @param writeStream - The WriteStream to read from.
+   * @param options - Stream options.
+   */
   constructor(writeStream: WriteStream, options?: ReadStreamOptions) {
     super({
       highWaterMark: options?.highWaterMark,
@@ -34,79 +69,135 @@ export class ReadStream extends Readable {
     this._writeStream = writeStream;
   }
 
-  _read(n: number): void {
-    if (this.destroyed) return;
+  /**
+   * Retries reading from the write stream after data is available.
+   */
+  private _retry = (): void => {
+    this._detachRetryListeners();
+    this._read(this.readableHighWaterMark || 65536);
+  };
 
-    if (typeof this._writeStream['_fd'] !== 'number') {
+  /**
+   * Attaches retry listeners to wait for more data or stream completion.
+   */
+  private _attachRetryListeners(): void {
+    if (this._retryListenersAttached) return;
+    this._writeStream.on('finish', this._retry);
+    this._writeStream.on('write', this._retry);
+    this._retryListenersAttached = true;
+  }
+
+  /**
+   * Detaches retry listeners when they are no longer needed.
+   */
+  private _detachRetryListeners(): void {
+    if (!this._retryListenersAttached) return;
+    this._writeStream.off('finish', this._retry);
+    this._writeStream.off('write', this._retry);
+    this._retryListenersAttached = false;
+  }
+
+  /**
+   * Internal read implementation that fetches data from the temporary file.
+   * @param n - Number of bytes to read.
+   */
+  _read(n: number): void {
+    if (this.destroyed) {
+      this._detachRetryListeners();
+      return;
+    }
+
+    const fd = this._writeStream.getFd();
+    if (fd === null) {
       this._writeStream.once('ready', () => this._read(n));
       return;
     }
 
-    // Using `allocUnsafe` here is OK because we return a slice the length of
-    // `bytesRead`, and discard the rest. This prevents node from having to zero
-    // out the entire allocation first.
     const buf = new Uint8Array(Buffer.allocUnsafe(n).buffer);
-    read(this._writeStream['_fd'], buf, 0, n, this._pos, (error, bytesRead) => {
-      if (error) this.destroy(error);
+    read(fd, buf, 0, n, this._pos, (error, bytesRead) => {
+      if (error) {
+        this.destroy(error);
+        this._detachRetryListeners();
+        return;
+      }
 
-      // Push any read bytes into the local stream buffer.
       if (bytesRead) {
         this._pos += bytesRead;
         this.push(buf.slice(0, bytesRead));
         return;
       }
 
-      // If there were no more bytes to read and the write stream is finished,
-      // then this stream has reached the end.
-      if (
-        (
-          this._writeStream as unknown as {
-            _writableState: { finished: boolean };
-          }
-        )._writableState.finished
-      ) {
-        // Check if we have consumed the whole file up to where
-        // the write stream has written before ending the stream
-        if (this._pos < (this._writeStream as unknown as { _pos: number })._pos)
+      if (this._writeStream.isWritableFinished()) {
+        const writePos = this._writeStream.getWritePosition();
+        if (this._pos < writePos) {
           this._read(n);
-        else this.push(null);
+        } else {
+          this.push(null);
+          this._detachRetryListeners();
+        }
         return;
       }
 
-      // Otherwise, wait for the write stream to add more data or finish.
-      const retry = (): void => {
-        this._writeStream.off('finish', retry);
-        this._writeStream.off('write', retry);
-        this._read(n);
-      };
-
-      this._writeStream.on('finish', retry);
-      this._writeStream.on('write', retry);
+      this._attachRetryListeners();
     });
+  }
+
+  /**
+   * Cleanup when the stream is destroyed.
+   */
+  _destroy(
+    error: Error | null,
+    callback: (error?: Error | null) => void,
+  ): void {
+    this._detachRetryListeners();
+    super._destroy(error, callback);
   }
 }
 
+/**
+ * Options for creating a WriteStream.
+ */
 export interface WriteStreamOptions {
+  /** Maximum number of bytes to store in the internal buffer before ceasing to write to the underlying resource. */
   highWaterMark?: WritableOptions['highWaterMark'];
+  /** Default encoding to use for the writable stream. */
   defaultEncoding?: WritableOptions['defaultEncoding'];
+  /** Function that returns the temporary directory path. */
   tmpdir?: () => string;
 }
 
+/**
+ * A writable stream that stores data in a temporary file.
+ * Supports multiple concurrent ReadStream instances reading from the same file.
+ * Automatically cleans up the temporary file when all streams are closed.
+ */
 export class WriteStream extends Writable {
-  private _fd: null | number = null;
-  private _path: null | string = null;
-  private _pos: number = 0;
-  private _readStreams: Set<ReadStream> = new Set();
-  private _released: boolean = false;
+  private _fd: number | null = null;
+  private _path: string | null = null;
+  private _pos = 0;
+  private readonly _readStreams = new Set<ReadStream>();
+  private _released = false;
+  private _tmpdir: () => string;
 
-  constructor(options?: WriteStreamOptions) {
+  /**
+   * Creates a new WriteStream with a temporary file.
+   * @param options - Stream options.
+   */
+  constructor(options: WriteStreamOptions = {}) {
     super({
-      highWaterMark: options?.highWaterMark,
-      defaultEncoding: options?.defaultEncoding,
+      highWaterMark: options.highWaterMark,
+      defaultEncoding: options.defaultEncoding,
       autoDestroy: false,
     });
+    this._tmpdir = options.tmpdir ?? tmpdir;
+    this._initFile();
+  }
 
-    // Generate a random filename.
+  /**
+   * Initializes the temporary file with a random name.
+   * Emits 'ready' when the file is ready for writing.
+   */
+  private _initFile(): void {
     randomBytes(16, (error, buffer) => {
       if (error) {
         this.destroy(error);
@@ -114,27 +205,53 @@ export class WriteStream extends Writable {
       }
 
       this._path = join(
-        (options?.tmpdir ?? tmpdir)(),
+        this._tmpdir(),
         `capacitor-${buffer.toString('hex')}.tmp`,
       );
 
-      // Create a file in the OS's temporary files directory.
       open(this._path, 'wx+', 0o600, (error, fd) => {
         if (error) {
           this.destroy(error);
           return;
         }
 
-        // Cleanup when the process exits or is killed.
-        processExitProxy.once('exit', this._cleanupSync);
-
+        PROCESS_EXIT_PROXY.once('exit', this._cleanupSync);
         this._fd = fd;
         this.emit('ready');
       });
     });
   }
 
-  _cleanup = (callback: (error: null | Error) => void): void => {
+  /**
+   * Returns the file descriptor for the temporary file.
+   * @returns The file descriptor or null if not yet initialized.
+   */
+  getFd(): number | null {
+    return this._fd;
+  }
+
+  /**
+   * Returns the current write position in the file.
+   * @returns The number of bytes written so far.
+   */
+  getWritePosition(): number {
+    return this._pos;
+  }
+
+  /**
+   * Checks if the writable stream has finished.
+   * @returns True if the stream is finished, false otherwise.
+   */
+  isWritableFinished(): boolean {
+    return (this as unknown as { _writableState: WritableState })._writableState
+      .finished;
+  }
+
+  /**
+   * Asynchronously cleans up the temporary file.
+   * Closes the file descriptor and deletes the file.
+   */
+  private _cleanup(callback: (error: Error | null) => void): void {
     const fd = this._fd;
     const path = this._path;
 
@@ -143,59 +260,61 @@ export class WriteStream extends Writable {
       return;
     }
 
-    // Close the file descriptor.
     close(fd, (closeError) => {
-      // An error here probably means the fd was already closed, but we can
-      // still try to unlink the file.
-      unlink(path, (unlinkError) => {
-        // If we are unable to unlink the file, the operating system will
-        // clean up on next restart, since we use store thes in `os.tmpdir()`
-        this._fd = null;
+      this._fd = null;
+      PROCESS_EXIT_PROXY.off('exit', this._cleanupSync);
 
-        // We avoid removing this until now in case an exit occurs while
-        // asyncronously cleaning up.
-        processExitProxy.off('exit', this._cleanupSync);
-        callback(unlinkError ?? closeError);
+      unlink(path, (unlinkError) => {
+        callback(unlinkError ?? closeError ?? null);
       });
     });
-  };
+  }
 
-  _cleanupSync = (): void => {
-    processExitProxy.off('exit', this._cleanupSync);
+  /**
+   * Synchronously cleans up the temporary file.
+   * Called on process exit to ensure cleanup even if async operations are interrupted.
+   */
+  private _cleanupSync = (): void => {
+    PROCESS_EXIT_PROXY.off('exit', this._cleanupSync);
 
-    if (typeof this._fd === 'number')
+    if (typeof this._fd === 'number') {
       try {
         closeSync(this._fd);
       } catch {
-        // An error here probably means the fd was already closed, but we can
-        // still try to unlink the file.
+        // File descriptor already closed
       }
+    }
 
-    try {
-      if (this._path !== null) {
+    if (this._path !== null) {
+      try {
         unlinkSync(this._path);
+      } catch {
+        // File already deleted
       }
-    } catch {
-      // If we are unable to unlink the file, the operating system will clean
-      // up on next restart, since we use store thes in `os.tmpdir()`
     }
   };
 
-  _final(callback: (error?: null | Error) => unknown): void {
-    if (typeof this._fd !== 'number') {
+  /**
+   * Called when the stream is finished writing.
+   */
+  _final(callback: (error?: Error | null) => void): void {
+    if (this._fd === null) {
       this.once('ready', () => this._final(callback));
       return;
     }
     callback();
   }
 
+  /**
+   * Internal write implementation that writes data to the temporary file.
+   */
   _write(
     chunk: Buffer,
-    encoding: string,
-    callback: (error?: null | Error) => unknown,
+    _encoding: string,
+    callback: (error?: Error | null) => void,
   ): void {
-    if (typeof this._fd !== 'number') {
-      this.once('ready', () => this._write(chunk, encoding, callback));
+    if (this._fd === null) {
+      this.once('ready', () => this._write(chunk, _encoding, callback));
       return;
     }
 
@@ -211,41 +330,29 @@ export class WriteStream extends Writable {
         return;
       }
 
-      // It's safe to increment `this._pos` after flushing to the filesystem
-      // because node streams ensure that only one `_write()` is active at a
-      // time. If this assumption is broken, the behavior of this library is
-      // undefined, regardless of where this is incremented. Relocating this
-      // to increment syncronously would result in correct file contents, but
-      // the out-of-order writes would still open the potential for read streams
-      // to scan positions that have not yet been written.
       this._pos += chunk.length;
       this.emit('write');
       callback();
     });
   }
 
-  release(): void {
-    this._released = true;
-    if (this._readStreams.size === 0) this.destroy();
-  }
-
+  /**
+   * Cleanup when the stream is destroyed.
+   * Destroys all associated ReadStreams and cleans up the temporary file.
+   */
   _destroy(
-    error: undefined | null | Error,
-    callback: (error?: null | Error) => unknown,
+    error: Error | null,
+    callback: (error?: Error | null) => void,
   ): void {
-    // Destroy all attached read streams.
     for (const readStream of this._readStreams) {
-      readStream.destroy(error || undefined);
+      readStream.destroy(error ?? undefined);
     }
 
-    // This capacitor is fully initialized.
-    if (typeof this._fd === 'number' && typeof this._path === 'string') {
+    if (this._fd !== null && this._path !== null) {
       this._cleanup((cleanupError) => callback(cleanupError ?? error));
       return;
     }
 
-    // This capacitor has not yet finished initialization; if initialization
-    // does complete, immediately clean up after.
     this.once('ready', () => {
       this._cleanup((cleanupError) => {
         if (cleanupError) {
@@ -257,21 +364,27 @@ export class WriteStream extends Writable {
     callback(error);
   }
 
+  /**
+   * Creates a new ReadStream that reads from this WriteStream.
+   * Multiple ReadStreams can be created and will read independently.
+   * @param options - Stream options for the ReadStream.
+   * @returns A new ReadStream instance.
+   * @throws {ReadAfterDestroyedError} If the WriteStream has been destroyed.
+   * @throws {ReadAfterReleasedError} If the WriteStream has been released.
+   */
   createReadStream(options?: ReadStreamOptions): ReadStream {
-    if (this.destroyed)
-      throw new ReadAfterDestroyedError(
-        'A ReadStream cannot be created from a destroyed WriteStream.',
-      );
+    if (this.destroyed) {
+      throw new ReadAfterDestroyedError();
+    }
 
-    if (this._released)
-      throw new ReadAfterReleasedError(
-        'A ReadStream cannot be created from a released WriteStream.',
-      );
+    if (this._released) {
+      throw new ReadAfterReleasedError();
+    }
 
     const readStream = new ReadStream(this, options);
     this._readStreams.add(readStream);
 
-    readStream.once('close', (): void => {
+    readStream.once('close', () => {
       this._readStreams.delete(readStream);
 
       if (this._released && this._readStreams.size === 0) {
@@ -280,6 +393,17 @@ export class WriteStream extends Writable {
     });
 
     return readStream;
+  }
+
+  /**
+   * Releases the WriteStream, marking it for cleanup.
+   * The stream will be destroyed once all ReadStreams are closed.
+   */
+  release(): void {
+    this._released = true;
+    if (this._readStreams.size === 0) {
+      this.destroy();
+    }
   }
 }
 

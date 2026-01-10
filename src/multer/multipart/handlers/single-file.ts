@@ -1,10 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
-import { BodyData } from 'hono/utils/body';
-
-import { StorageFile } from '../../storage';
-import { filterUpload } from '../filter';
+import { StorageFile } from '../../storage/storage';
 import { UploadOptions } from '../options';
-import { THonoRequest, getParts } from '../request';
+import { THonoRequest } from '../request';
+import { FileHandler, SingleFileResult } from './base-handler';
 
 /**
  * Handles a single file upload in a multipart request.
@@ -17,53 +14,23 @@ export const handleMultipartSingleFile = async (
   req: THonoRequest,
   fieldname: string,
   options: UploadOptions,
-) => {
-  const parts = getParts(req, options);
-  const body: BodyData = {};
+): Promise<SingleFileResult> => {
+  const handler = new FileHandler(req, options);
   let file: StorageFile | undefined;
 
-  /**
-   * Removes uploaded file in case of an error or cleanup.
-   * @param error - Whether the removal is due to an error.
-   */
-  const removeFiles = async (error?: boolean) => {
-    if (!file) return;
-    await options.storage!.removeFile(file, error);
-  };
+  await handler.process(async (fieldName, part) => {
+    handler.validateFieldName(fieldName, fieldname);
+    handler.validateSingleFile(file);
 
-  try {
-    for await (const [partFieldName, part] of Object.entries(parts)) {
-      if (!(part instanceof File)) {
-        body[partFieldName] = part;
-        continue;
-      }
-
-      if (partFieldName !== fieldname) {
-        throw new BadRequestException(
-          `Field "${partFieldName}" doesn't accept file.`,
-        );
-      }
-
-      if (file) {
-        throw new BadRequestException(
-          `Field "${fieldname}" accepts only one file.`,
-        );
-      }
-
-      const _file = await options.storage!.handleFile(part, req, partFieldName);
-
-      if (await filterUpload(options, req, _file)) {
-        file = _file;
-      }
+    const storageFile = await handler.handleSingleFile(fieldName, part);
+    if (storageFile) {
+      file = storageFile;
     }
-  } catch (error) {
-    await removeFiles(true);
-    throw error;
-  }
+  });
 
   return {
-    body,
+    body: handler.getBody(),
     file,
-    remove: () => removeFiles(),
+    remove: handler.createRemoveFunction(),
   };
 };

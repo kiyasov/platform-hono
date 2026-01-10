@@ -36,10 +36,26 @@ export const getParts = (
 ): BodyData => {
   const parts = req.body ?? {};
 
-  for (const [key, file] of Object.entries(parts)) {
-    if (file instanceof File) {
+  for (const [key, value] of Object.entries(parts)) {
+    // Handle array of files
+    if (Array.isArray(value) && value.every((item) => item instanceof File)) {
       const maxSize = options?.limits?.fileSize;
-      if (maxSize && file.size > maxSize) {
+      if (maxSize) {
+        for (const file of value) {
+          if (file.size > maxSize) {
+            throw new BadRequestException(
+              `File "${key}" is too large. Maximum size is ${maxSize} bytes.`,
+            );
+          }
+        }
+      }
+      continue;
+    }
+
+    // Handle single file
+    if (value instanceof File) {
+      const maxSize = options?.limits?.fileSize;
+      if (maxSize && value.size > maxSize) {
         throw new BadRequestException(
           `File "${key}" is too large. Maximum size is ${maxSize} bytes.`,
         );

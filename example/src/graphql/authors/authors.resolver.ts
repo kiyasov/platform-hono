@@ -12,20 +12,22 @@ export class AuthorsResolver {
 
   @Mutation(() => Boolean)
   async uploadFile(
-    @Args('image', { type: () => GraphQLUpload }) image: FileUpload,
+    @Args('image', { type: () => GraphQLUpload }) image: Promise<FileUpload>,
   ): Promise<boolean> {
     console.log(image);
-    const { createReadStream, filename } = image;
+    const imageResolved = await image;
+
+    const { createReadStream, originalFilename } = imageResolved;
     const readStream = createReadStream();
 
-    const chunks: any[] = [];
+    const chunks: Uint8Array[] = [];
 
     for await (const chunk of readStream) {
       chunks.push(chunk);
     }
     const fileBuffer = Buffer.concat(chunks);
     const outDir = join(process.cwd(), 'uploads');
-    const outPath = join(outDir, filename);
+    const outPath = join(outDir, originalFilename);
 
     await fs.promises.mkdir(outDir, { recursive: true });
     await fs.promises.writeFile(outPath, fileBuffer);
@@ -37,20 +39,24 @@ export class AuthorsResolver {
 
   @Mutation(() => Boolean)
   async uploadFiles(
-    @Args('images', { type: () => [GraphQLUpload] }) images: FileUpload[],
+    @Args('images', { type: () => [GraphQLUpload] })
+    images: Promise<FileUpload>[],
   ) {
-    for (const image of images) {
-      const { createReadStream, filename } = image;
+    // Resolve all promises first
+    const files = await Promise.all(images);
+
+    for (const image of files) {
+      const { createReadStream, originalFilename } = image;
       const readStream = createReadStream();
 
-      const chunks: any[] = [];
+      const chunks: Uint8Array[] = [];
 
       for await (const chunk of readStream) {
         chunks.push(chunk);
       }
       const fileBuffer = Buffer.concat(chunks);
       const outDir = join(process.cwd(), 'uploads');
-      const outPath = join(outDir, filename);
+      const outPath = join(outDir, originalFilename);
 
       await fs.promises.mkdir(outDir, { recursive: true });
       await fs.promises.writeFile(outPath, fileBuffer);

@@ -22,15 +22,15 @@ import { readFile } from 'fs/promises';
 import { Context } from 'hono';
 import { stream } from 'hono/streaming';
 
+import { HonoRequest } from '../../src/interfaces';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
   FilesInterceptor,
   UploadedFile,
   UploadedFiles,
-  HonoRequest,
   MemoryStorageFile,
-} from '../../dist/cjs';
+} from '../../src/multer';
 import { AppService } from './app.service';
 
 // setInterval(() => {
