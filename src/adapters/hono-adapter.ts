@@ -221,8 +221,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   public setErrorHandler(handler: ErrorHandler) {
     this.instance.onError(async (err: Error, ctx: Context) => {
-      const argumentsHost = this.createArgumentsHost(ctx);
-      await handler(err, ctx.req, argumentsHost);
+      await handler(err, ctx.req, ctx);
 
       return this.getBody(ctx);
     });
@@ -230,8 +229,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
 
   public setNotFoundHandler(handler: RequestHandler) {
     this.instance.notFound(async (ctx: Context) => {
-      const argumentsHost = this.createArgumentsHost(ctx);
-      await handler(ctx.req, argumentsHost);
+      await handler(ctx.req, ctx);
       await this.status(ctx, HttpStatus.NOT_FOUND);
 
       return this.getBody(ctx, 'Not Found');
@@ -413,8 +411,7 @@ export class HonoAdapter extends AbstractHttpAdapter<
       ).bind(this.instance);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
       routeMethod(path, async (ctx: Context, next: Function) => {
-        const argumentsHost = this.createArgumentsHost(ctx);
-        await callback(ctx.req, argumentsHost, next);
+        await callback(ctx.req, ctx, next);
       });
     };
   }
@@ -436,17 +433,5 @@ export class HonoAdapter extends AbstractHttpAdapter<
         throw new Error(errorMessage);
       },
     });
-  }
-
-  /**
-   * Creates a NestJS-compatible ArgumentsHost wrapper around Hono Context
-   */
-  private createArgumentsHost(ctx: Context) {
-    const argumentsHost = {
-      getRequest: () => ctx.req,
-      getResponse: () => ctx,
-      switchToHttp: () => argumentsHost,
-    };
-    return argumentsHost;
   }
 }
